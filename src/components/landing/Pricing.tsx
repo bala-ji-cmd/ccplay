@@ -218,7 +218,7 @@ export function Pricing() {
           </div>
 
           {/* YoYo's Adventure Pass (Mid-Tier) */}
-          <div className="bg-gradient-to-br from-[#FFF8E0] to-white rounded-[2rem] shadow-xl overflow-hidden border-4 border-[#FFD747] transform scale-110 z-10 relative">
+          <div className="bg-gradient-to-br from-[#FFF8E0] to-white rounded-[2rem] shadow-xl overflow-hidden border-4 border-[#FFD747] transform scale-105 z-10 relative">
             <div className="absolute -top-6 -left-6 w-24 h-24">
               <Image src="/yoyo-happy.png" alt="YoYo" width={80} height={80} className="drop-shadow-lg" />
             </div>

@@ -6,15 +6,17 @@ export function Header() {
     return (
         <header className="container mx-auto py-4 px-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="transform -rotate-6 hover:rotate-0 transition-transform duration-300">
+          <div className="transform -rotate-6 hover:rotate-0 transition-all duration-300">
             <Image
-              src="/logo.webp"
+              src="/logo.png"
               alt="Cocomelon Play Logo"
               width={70}
               height={70}
               quality={100}
-              className="rounded-full border-4 border-[#FF4D79]"
+              className="hover:scale-110 transition-transform duration-300 ease-in-out hover:filter hover:drop-shadow-xl"
               priority
+              style={{ backgroundColor: 'transparent' }}
+              unoptimized
             />
           </div>
           <span

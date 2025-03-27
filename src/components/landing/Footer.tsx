@@ -103,12 +103,14 @@ export function Footer() {
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 border-b border-white/20 pb-8">
         <div className="flex items-center gap-3 mb-4 md:mb-0">
           <Image
-            src="/logo.webp"
+            src="/logo.png"
             alt="Cocomelon Play Logo"
             width={60}
             height={60}
             quality={100}
-            className="rounded-full border-4 border-[#FFD747]"
+            className="hover:scale-110 transition-transform duration-300 ease-in-out hover:filter hover:drop-shadow-xl"
+            style={{ backgroundColor: 'transparent' }}
+            unoptimized
           />
           <div>
             <span

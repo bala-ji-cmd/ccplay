@@ -47,7 +47,7 @@ export function PainPointSolution() {
                   </div>
                   <div>
                     <p className="text-xl font-medium">
-                      "My child loves Cocomelon but gets frustrated when trying to draw the characters"
+                      "My child struggles with knowing how to start drawing or what to draw in the first place."
                     </p>
                   </div>
                 </div>
@@ -66,11 +66,11 @@ export function PainPointSolution() {
               <div className="p-8 space-y-4">
                 <div className="flex items-center gap-6">
                   <div className="min-w-[80px] h-[80px] rounded-full bg-white border-4 border-[#4A66E0] flex items-center justify-center overflow-hidden">
-                    <Image src="/cody-happy.png" alt="Cody is happy" width={70} height={70} />
+                    <Image src="/jj-happy.png" alt="YoYo is happy" width={70} height={70} />
                   </div>
                   <div>
                     <p className="text-xl font-medium">
-                      "Cocomelon Play's AI buddy Cody gives step-by-step guidance to draw any Cocomelon character!"
+                      "Our AI buddy YoYo gives step-by-step guidance to draw and and build creative confidence from the start!"
                     </p>
                   </div>
                 </div>
@@ -93,7 +93,7 @@ export function PainPointSolution() {
                     <Image src="/yoyo-sad.png" alt="YoYo is sad" width={70} height={70} />
                   </div>
                   <div>
-                    <p className="text-xl font-medium">"My drawings don't look like the real Cocomelon characters"</p>
+                    <p className="text-xl font-medium">"Even after drawing something, my child is often dissatisfied with the results as it doesn't look the way they hoped."</p>
                   </div>
                 </div>
               </div>
@@ -111,11 +111,11 @@ export function PainPointSolution() {
               <div className="p-8 space-y-4">
                 <div className="flex items-center gap-6">
                   <div className="min-w-[80px] h-[80px] rounded-full bg-white border-4 border-[#4A66E0] flex items-center justify-center overflow-hidden">
-                    <Image src="/jj-happy.png" alt="JJ is happy" width={70} height={70} />
+                    <Image src="/yoyo-happy.png" alt="JJ is happy" width={70} height={70} />
                   </div>
                   <div>
                     <p className="text-xl font-medium">
-                      "JJ the AI helper can improve your drawings with simple voice commands!"
+                      "Our AI helper can improve your drawings with simple voice commands! Allowing them to easily improve their artwork and achieve more satisfying results!"
                     </p>
                     <div className="mt-2">
                       <span className="inline-block bg-[#FFD747] text-[#4A66E0] text-sm font-bold px-3 py-1 rounded-full mr-2 mt-2">
@@ -146,7 +146,7 @@ export function PainPointSolution() {
                     <Image src="/tomtom-sad.png" alt="TomTom is sad" width={70} height={70} />
                   </div>
                   <div>
-                    <p className="text-xl font-medium">"Static drawings don't keep my child engaged for long"</p>
+                    <p className="text-xl font-medium">"My child finds that once a drawing is finished, it's not very exciting or doesn't hold their attention for long."</p>
                   </div>
                 </div>
               </div>
@@ -164,11 +164,11 @@ export function PainPointSolution() {
               <div className="p-8 space-y-4">
                 <div className="flex items-center gap-6">
                   <div className="min-w-[80px] h-[80px] rounded-full bg-white border-4 border-[#4A66E0] flex items-center justify-center overflow-hidden">
-                    <Image src="/astor-happy.png" alt="Astor is happy" width={70} height={70} />
+                    <Image src="/tomtom-happy.png" alt="Astor is happy" width={70} height={70} />
                   </div>
                   <div>
                     <p className="text-xl font-medium">
-                      "Astor brings drawings to life with animation - watch JJ dance and sing!"
+                      "Our AI teacher TomTom brings drawings to life with animation - transforming static art into engaging and dynamic experiences!"
                     </p>
                     <div className="mt-2 relative">
                       <span
