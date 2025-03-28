@@ -89,3 +89,12 @@
   animation: haptic-pulse 0.2s ease-in-out;
 }
 
+/* Add these styles to handle dropdown positioning and clicking outside */
+.relative {
+    position: relative;
+}
+
+.z-50 {
+    z-index: 50;
+}
+

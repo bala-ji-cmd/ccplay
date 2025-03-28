@@ -1,7 +1,24 @@
+'use client'
+
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 
 export function HeroSection() {
+    const { user } = useAuth()
+    const router = useRouter()
+
+    const handleDrawClick = () => {
+        if (user) {
+            // User is logged in, redirect to drawing app
+            router.push('/draw')
+        } else {
+            // User is not logged in, redirect to login page with return URL
+            router.push('/auth/login?redirectTo=/app/draw')
+        }
+    }
+
     return (
         <section className="container mx-auto py-8 md:py-12 px-4">
         <div className="relative bg-[#E9F7FF] rounded-3xl p-8 md:p-12 overflow-hidden border-8 border-[#FFD747]">
@@ -30,9 +47,12 @@ export function HeroSection() {
                 >
                   <span className="text-[#4A66E0] block">Draw, Learn &</span>
                   <span className="text-[#FF4D79] block">Animate with</span>
-                  <span className="text-[#FFD747] bg-[#4A66E0] inline-block px-4 py-2 rounded-xl transform -rotate-2 mt-2 shadow-lg">
-                    Cocomelon Friends!
-                  </span>
+                  <div className="flex justify-center md:justify-start">
+                    <span className="text-[#FFD747] bg-[#4A66E0] inline-block px-4 py-2 rounded-xl 
+                                     transform -rotate-2 mt-2 shadow-lg text-center">
+                      Cocomelon Friends!
+                    </span>
+                  </div>
                 </h1>
                 <div className="w-24 h-1 bg-[#FF4D79] mx-auto md:mx-0 my-4 rounded-full"></div>
               </div>
@@ -40,18 +60,22 @@ export function HeroSection() {
                 Join JJ, YoYo, and TomTom on a super fun creative adventure! Make amazing drawings with AI help!
               </p>
               <div className="flex flex-col sm:flex-row gap-6 pt-4 justify-center md:justify-start">
-                <Button className="bg-[#FFD747] hover:bg-[#FFDF6B] text-[#4A66E0] rounded-full px-8 py-8 text-xl font-bold shadow-lg transition-transform hover:scale-110 border-4 border-white flex items-center gap-2">
+                <Button 
+                  onClick={handleDrawClick}
+                  className="bg-[#FFD747] hover:bg-[#FFDF6B] text-[#4A66E0] rounded-full px-6 py-3 
+                             text-lg font-bold shadow-lg transition-transform hover:scale-105 
+                             border-4 border-white flex items-center gap-2"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
+                    width="20"
+                    height="20"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="3"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="lucide lucide-pencil"
                   >
                     <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
                   </svg>
@@ -59,19 +83,20 @@ export function HeroSection() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="bg-white border-4 border-[#FF4D79] text-[#FF4D79] hover:bg-[#FF4D79] hover:text-white rounded-full px-8 py-8 text-xl font-bold shadow-lg transition-transform hover:scale-110 flex items-center gap-2"
+                  className="bg-white border-4 border-[#FF4D79] text-[#FF4D79] hover:bg-[#FF4D79] 
+                             hover:text-white rounded-full px-6 py-3 text-lg font-bold shadow-lg 
+                             transition-transform hover:scale-105 flex items-center gap-2"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
+                    width="20"
+                    height="20"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="3"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="lucide lucide-play"
                   >
                     <polygon points="5 3 19 12 5 21 5 3" />
                   </svg>

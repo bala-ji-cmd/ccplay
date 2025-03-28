@@ -1,5 +1,12 @@
+'use client'
+
 import Image from "next/image"
+import Link from "next/link"
+import { useAuth } from '@/contexts/AuthContext'
+
 export function Footer() {
+  const { user } = useAuth()
+
   return (
     <footer className="relative overflow-hidden bg-gradient-to-r from-[#4A66E0]/90 to-[#5A76F0]/90 py-12 text-white">
     {/* Decorative background elements */}
@@ -124,12 +131,14 @@ export function Footer() {
         </div>
 
         <div className="flex gap-4">
-          <a
-            href="#"
-            className="bg-white hover:bg-gray-100 text-[#4A66E0] rounded-full px-4 py-2 font-bold transition-transform hover:scale-105 text-sm md:text-base"
-          >
-            Sign Up Free
-          </a>
+          {!user && (
+            <Link
+              href="/auth/signup"
+              className="bg-white hover:bg-gray-100 text-[#4A66E0] rounded-full px-4 py-2 font-bold transition-transform hover:scale-105 text-sm md:text-base"
+            >
+              Sign Up Free
+            </Link>
+          )}
         </div>
       </div>
 
@@ -144,7 +153,7 @@ export function Footer() {
           </h3>
           <ul className="space-y-2">
             <li>
-              <a href="#" className="text-white hover:text-[#FFD747] transition-colors flex items-center gap-1">
+              <Link href="/draw" className="text-white hover:text-[#FFD747] transition-colors flex items-center gap-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -155,19 +164,14 @@ export function Footer() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="lucide lucide-home"
                 >
-                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
+                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
                 </svg>
-                Home
-              </a>
+                Draw with AI
+              </Link>
             </li>
             <li>
-              <a
-                href="#features"
-                className="text-white hover:text-[#FFD747] transition-colors flex items-center gap-1"
-              >
+              <Link href="/learn" className="text-white hover:text-[#FFD747] transition-colors flex items-center gap-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -178,22 +182,15 @@ export function Footer() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="lucide lucide-sparkles"
                 >
-                  <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-                  <path d="M5 3v4" />
-                  <path d="M19 17v4" />
-                  <path d="M3 5h4" />
-                  <path d="M17 19h4" />
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
                 </svg>
-                Features
-              </a>
+                Learn with AI
+              </Link>
             </li>
             <li>
-              <a
-                href="#drawings"
-                className="text-white hover:text-[#FFD747] transition-colors flex items-center gap-1"
-              >
+              <Link href="/animate" className="text-white hover:text-[#FFD747] transition-colors flex items-center gap-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -204,20 +201,15 @@ export function Footer() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="lucide lucide-image"
                 >
-                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                  <circle cx="9" cy="9" r="2" />
-                  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                  <path d="M4 11v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8H4Z" />
+                  <path d="m4 11-.88-2.87a2 2 0 0 1 1.33-2.5l11.48-3.5a2 2 0 0 1 2.5 1.33l.87 2.87L4 11.01Z" />
                 </svg>
-                Gallery
-              </a>
+                Animate with AI
+              </Link>
             </li>
             <li>
-              <a
-                href="#pricing"
-                className="text-white hover:text-[#FFD747] transition-colors flex items-center gap-1"
-              >
+              <Link href="/daily-challenge" className="text-white hover:text-[#FFD747] transition-colors flex items-center gap-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -228,13 +220,15 @@ export function Footer() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="lucide lucide-tag"
                 >
-                  <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
-                  <circle cx="7.5" cy="7.5" r="1.5" />
+                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                  <line x1="16" x2="16" y1="2" y2="6" />
+                  <line x1="8" x2="8" y1="2" y2="6" />
+                  <line x1="3" x2="21" y1="10" y2="10" />
+                  <path d="m9 16 2 2 4-4" />
                 </svg>
-                Pricing
-              </a>
+                Daily Challenge
+              </Link>
             </li>
           </ul>
         </div>
