@@ -47,7 +47,7 @@ export function PainPointSolution() {
                   </div>
                   <div>
                     <p className="text-xl font-medium">
-                      "My child struggles with knowing how to start drawing or what to draw in the first place."
+                      "My child struggles to start drawing — Needs creative guidance."
                     </p>
                   </div>
                 </div>
@@ -70,7 +70,7 @@ export function PainPointSolution() {
                   </div>
                   <div>
                     <p className="text-xl font-medium">
-                      "Our AI buddy YoYo gives step-by-step guidance to draw and and build creative confidence from the start!"
+                      "Our AI buddy YoYo — Builds confidence with step-by-step guidance!"
                     </p>
                   </div>
                 </div>
@@ -93,7 +93,7 @@ export function PainPointSolution() {
                     <Image src="/yoyo-sad.png" alt="YoYo is sad" width={70} height={70} />
                   </div>
                   <div>
-                    <p className="text-xl font-medium">"Even after drawing something, my child is often dissatisfied with the results as it doesn't look the way they hoped."</p>
+                    <p className="text-xl font-medium">"My child is dissatisfied with drawing results — Seeks easy improvement methods."</p>
                   </div>
                 </div>
               </div>
@@ -115,7 +115,7 @@ export function PainPointSolution() {
                   </div>
                   <div>
                     <p className="text-xl font-medium">
-                      "Our AI helper can improve your drawings with simple voice commands! Allowing them to easily improve their artwork and achieve more satisfying results!"
+                      "Our AI helper can improve your drawings with simple voice commands!"
                     </p>
                     <div className="mt-2">
                       <span className="inline-block bg-[#FFD747] text-[#4A66E0] text-sm font-bold px-3 py-1 rounded-full mr-2 mt-2">
@@ -146,7 +146,7 @@ export function PainPointSolution() {
                     <Image src="/tomtom-sad.png" alt="TomTom is sad" width={70} height={70} />
                   </div>
                   <div>
-                    <p className="text-xl font-medium">"My child finds that once a drawing is finished, it's not very exciting or doesn't hold their attention for long."</p>
+                    <p className="text-xl font-medium">"My child loses interest post-drawing — Desires engaging experiences."</p>
                   </div>
                 </div>
               </div>
@@ -168,7 +168,7 @@ export function PainPointSolution() {
                   </div>
                   <div>
                     <p className="text-xl font-medium">
-                      "Our AI teacher TomTom brings drawings to life with animation - transforming static art into engaging and dynamic experiences!"
+                      "Our AI teacher TomTom brings drawings to life with animation!"
                     </p>
                     <div className="mt-2 relative">
                       <span
