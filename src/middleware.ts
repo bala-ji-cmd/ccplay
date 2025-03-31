@@ -21,7 +21,8 @@ export async function middleware(req: NextRequest) {
     // If no session and trying to access protected routes, redirect to login
     if (!session && (
       req.nextUrl.pathname.startsWith('/profile') || 
-      req.nextUrl.pathname.startsWith('/dashboard')
+      req.nextUrl.pathname.startsWith('/dashboard') ||
+      req.nextUrl.pathname.startsWith('/api/payments')
     )) {
       const redirectUrl = req.nextUrl.clone()
       redirectUrl.pathname = '/auth/login'
@@ -48,6 +49,8 @@ export const config = {
   matcher: [
     '/app/:path*',
     '/auth/callback',
-    '/api/auth/callback'
+    '/api/auth/callback',
+    '/api/draw/generate',
+    '/api/learn/generate'
   ]
 } 

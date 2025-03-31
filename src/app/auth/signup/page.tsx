@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import { AuthInput } from '@/components/auth/AuthInput'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 
 export default function SignupPage() {
   const { signUp } = useAuth()
@@ -24,7 +25,7 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-
+    
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       return
@@ -38,11 +39,26 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      await signUp(formData.email, formData.password, {
+      const signUpResult = await signUp(formData.email, formData.password, {
         childName: formData.childName,
         childAge: formData.childAge,
       })
-      router.push('/app')
+      
+      // Initialize free tier subscription
+      const { error: subscriptionError } = await supabase
+        .from('subscriptions')
+        .insert([{ 
+          user_id: signUpResult.user.id,
+          plan_type: 'free_tier',
+          credits_allocated: 50,
+          credits_left: 50,
+          sub_status: 'active',
+          plan_start_date: new Date().toISOString(),
+          plan_end_date: new Date(9999, 11, 31).toISOString() // Far future date for free tier
+        }])
+
+      if (subscriptionError) throw subscriptionError;
+      router.push('/')
     } catch (err) {
       setError('Failed to create account')
     } finally {

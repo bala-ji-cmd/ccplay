@@ -1,0 +1,89 @@
+.kid-friendly-text {
+  font-family: 'Comic Sans MS', 'Bubblegum Sans', cursive;
+}
+
+
+/* Update menu button styles for vertical layout */
+.menu-button {
+  width: 36px; /* Slightly smaller to fit nicely */
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  color: #6B7280;
+  margin: 2px 0; /* Add some vertical spacing */
+}
+
+.menu-button:hover {
+  background: #E5E7EB;
+  transform: scale(1.05);
+}
+
+.menu-button.active {
+  background: #8B5CF6;
+  color: white;
+  border-color: #7C3AED;
+}
+
+.menu-button.pencil {
+  background: var(--primary);
+  color: white;
+}
+
+.menu-button.eraser {
+  background: var(--primary);
+  color: white;
+}
+
+.menu-button.undo {
+  background: var(--primary);
+  color: white;
+}
+
+.menu-button.clear {
+  background: var(--secondary);
+  color: white;
+}
+
+.menu-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Add a slight adjustment to make the toolbar buttons pop */
+.vertical-toolbar .menu-button {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Add these styles for stroke size options */
+.stroke-size-option {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stroke-size-option:hover {
+  background-color: #F3F4F6;
+}
+
+.stroke-size-option.active {
+  background-color: #EDE9FE;
+}
+
+/* Add click-away handling */
+.stroke-size-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+} 

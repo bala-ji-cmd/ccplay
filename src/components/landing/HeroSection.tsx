@@ -4,19 +4,29 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 export function HeroSection() {
     const { user } = useAuth()
     const router = useRouter()
+    const [mounted, setMounted] = useState(false)
 
-    const handleDrawClick = () => {
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    const handleDrawClick = async () => {
         if (user) {
             // User is logged in, redirect to drawing app
-            router.push('/draw')
+            await router.push('/draw')
         } else {
             // User is not logged in, redirect to login page with return URL
-            router.push('/auth/login?redirectTo=/app/draw')
+            await router.push('/auth/login?redirectTo=/draw')
         }
+    }
+
+    if (!mounted) {
+        return null // or a loading skeleton
     }
 
     return (
@@ -63,23 +73,11 @@ export function HeroSection() {
                 <Button 
                   onClick={handleDrawClick}
                   className="bg-[#FFD747] hover:bg-[#FFDF6B] text-[#4A66E0] rounded-full px-6 py-3 
-                             text-lg font-bold shadow-lg transition-transform hover:scale-105 
-                             border-4 border-white flex items-center gap-2"
+                  text-lg font-bold shadow-lg transition-transform hover:scale-105 
+                  border-4 border-white flex items-center gap-2"
+
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                  </svg>
-                  Start Drawing Now!
+                  Start Drawing Now
                 </Button>
                 <Button
                   variant="outline"

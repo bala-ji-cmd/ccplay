@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { useAuth } from '@/contexts/AuthContext'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSubscription } from "@/hooks/useSubscription"
 
 const navigationItems = [
   {
@@ -90,12 +91,38 @@ const navigationItems = [
       </svg>
     ),
   },
+  {
+    name: 'Pricing',
+    href: '/pricing',
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M2.5 19.5L22 19.5" />
+        <path d="M3.5 5.5L7.5 9.5" />
+        <path d="M8.5 4.5L6.5 10.5" />
+        <path d="M11.5 4.5L9.5 10.5" />
+        <path d="M14.5 4.5L12.5 10.5" />
+        <path d="M17.5 4.5L15.5 10.5" />
+        <path d="M20.5 4.5L18.5 10.5" />
+      </svg>
+    ),
+  },
 ];
 
 export function Header() {
     const { user, signOut } = useAuth()
     const router = useRouter()
     const [showDropdown, setShowDropdown] = useState(false)
+    const { subscriptionStatus } = useSubscription();
 
     const handleSignOut = async () => {
         try {
@@ -108,6 +135,7 @@ export function Header() {
 
     return (
         <header className="container mx-auto py-2 px-4 flex items-center justify-between">
+            <Link href="/">
             <div className="flex items-center gap-2">
                 <div className="transform -rotate-6 hover:rotate-0 transition-all duration-300">
                     <Image
@@ -130,6 +158,7 @@ export function Header() {
                     Cocomelon Play
                 </span>
             </div>
+            </Link>
 
             <nav className="hidden md:flex gap-2">
                 {navigationItems.map((item) => (
@@ -145,10 +174,17 @@ export function Header() {
                     </Link>
                 ))}
             </nav>
-
+            <div className="flex items-center gap-2">
+                <Button variant="outline" className="bg-white border border-[#FF4D79] text-[#FF4D79] hover:bg-[#FF4D79] 
+                             hover:text-white rounded-full px-4 py-2 text-lg font-medium text-sm shadow-lg 
+                             transition-transform hover:scale-105 flex items-center gap-2">
+                    {subscriptionStatus?.creditsLeft} Credits
+                </Button>
+            </div>
             <div className="flex items-center gap-2">
                 {user ? (
                     <div className="relative">
+                        
                         <button
                             onClick={() => setShowDropdown(!showDropdown)}
                             className="flex items-center gap-2 bg-white hover:bg-gray-50 text-[#4A66E0] 

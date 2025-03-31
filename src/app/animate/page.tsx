@@ -1,8 +1,27 @@
+"use client"
+
 import { ComingSoonLayout } from "@/components/ComingSoonLayout"
+import { SubscriptionModal } from "@/components/ui/subscriptionmodal";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useEffect, useState } from "react";
 
 export default function AnimatePage() {
+  const { subscriptionStatus } = useSubscription();
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+
+  useEffect(() => {
+    console.log('subscriptionStatus',subscriptionStatus);
+    if (subscriptionStatus) {
+      // Show subscription modal if subscription is not valid
+      if (subscriptionStatus.planType !== 'tier3' || !subscriptionStatus.isActive) {
+        setShowSubscriptionModal(true);
+      }
+    } 
+  }, [subscriptionStatus]);
   return (
-    <ComingSoonLayout
+    <div>
+      {showSubscriptionModal && <SubscriptionModal message="This feature is not available for your plan. Please upgrade to a higher plan to use this feature." />}
+      <ComingSoonLayout
       title="Animate with AI"
       subtitle="Coming Soon!"
       description="Bring your drawings to life with magical AI animation tools!"
@@ -33,5 +52,6 @@ export default function AnimatePage() {
         "Share animated stories"
       ]}
     />
+    </div>
   )
 } 

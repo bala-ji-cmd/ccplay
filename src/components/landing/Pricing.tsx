@@ -1,7 +1,50 @@
+'use client'
+
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"; // Change this line
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Pricing() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const { session } = useAuth();
+  const handleSubscribe = async (planId: string) => {
+    try {
+      console.log('handleSubscribe', planId);
+      setIsLoading(true);
+      
+      const response = await fetch('/api/payments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+         // Add this line
+        body: JSON.stringify({
+          planId,
+          isAnnual: false, // Add annual billing support if needed,
+          session: session
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Redirect to Stripe checkout
+      window.location.href = data.checkoutUrl;
+
+    } catch (error) {
+      console.error('Subscription error:', error);
+      // Add your error handling/notification here
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <section id="pricing" className="container mx-auto py-16 px-4">
         <h2
@@ -194,25 +237,12 @@ export function Pricing() {
                   </div>
                 </li>
               </ul>
-              <Button className="w-full bg-[#E9F7FF] hover:bg-[#D9E7FF] text-[#4A66E0] rounded-full py-6 text-xl font-bold shadow-lg transition-transform hover:scale-105 border-4 border-white flex items-center justify-center gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-rocket"
-                >
-                  <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-                  <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
-                  <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
-                  <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
-                </svg>
-                Start Your Adventure!
+              <Button 
+                onClick={() => handleSubscribe('jj-fun-pack')}
+                disabled={isLoading}
+                className="w-full bg-[#4A66E0] hover:bg-[#5B75E8] text-white rounded-full py-6 text-xl font-bold shadow-lg transition-transform hover:scale-105 border-4 border-white flex items-center justify-center gap-2"
+              >
+                {isLoading ? 'Processing...' : 'Subscribe Now'}
               </Button>
             </div>
           </div>
@@ -386,30 +416,12 @@ export function Pricing() {
                   </div>
                 </li>
               </ul>
-              <Button className="w-full bg-[#FFD747] hover:bg-[#FFDF6B] text-[#4A66E0] rounded-full py-6 text-xl font-bold shadow-lg transition-transform hover:scale-105 border-4 border-white flex items-center justify-center gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-party-popper"
-                >
-                  <path d="M5.8 11.3 2 22l10.7-3.79" />
-                  <path d="M4 3h.01" />
-                  <path d="M22 8h.01" />
-                  <path d="M15 2h.01" />
-                  <path d="M22 20h.01" />
-                  <path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12v0c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10" />
-                  <path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11v0c-.11.7-.72 1.22-1.43 1.22H17" />
-                  <path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98v0C9.52 4.9 9 5.52 9 6.23V7" />
-                  <path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z" />
-                </svg>
-                Join the Adventure!
+              <Button 
+                onClick={() => handleSubscribe('yoyo-adventure-pack')}
+                disabled={isLoading}
+                className="w-full bg-[#FFD747] hover:bg-[#FFDF6B] text-[#4A66E0] rounded-full py-6 text-xl font-bold shadow-lg transition-transform hover:scale-105 border-4 border-white flex items-center justify-center gap-2"
+              >
+                {isLoading ? 'Processing...' : 'Subscribe Now'}
               </Button>
             </div>
           </div>
@@ -580,22 +592,12 @@ export function Pricing() {
                   </div>
                 </li>
               </ul>
-              <Button className="w-full bg-[#FF4D79] hover:bg-[#FF6B8E] text-white rounded-full py-6 text-xl font-bold shadow-lg transition-transform hover:scale-105 border-4 border-white flex items-center justify-center gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-crown"
-                >
-                  <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z" />
-                </svg>
-                Unlock Galaxy of Fun!
+              <Button 
+                onClick={() => handleSubscribe('creative-galaxy-pack')}
+                disabled={isLoading}
+                className="w-full bg-[#FF4D79] hover:bg-[#FF6B8E] text-white rounded-full py-6 text-xl font-bold shadow-lg transition-transform hover:scale-105 border-4 border-white flex items-center justify-center gap-2"
+              >
+                {isLoading ? 'Processing...' : 'Subscribe Now'}
               </Button>
             </div>
           </div>

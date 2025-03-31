@@ -108,6 +108,7 @@ export function Footer() {
     <div className="container mx-auto px-4 relative z-10">
       {/* Top section with logo and tagline */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 border-b border-white/20 pb-8">
+        <Link href="/">
         <div className="flex items-center gap-3 mb-4 md:mb-0">
           <Image
             src="/logo.png"
@@ -129,6 +130,7 @@ export function Footer() {
             <p className="text-sm text-white/80">Draw, Learn & Animate with Cocomelon!</p>
           </div>
         </div>
+        </Link>
 
         <div className="flex gap-4">
           {!user && (
