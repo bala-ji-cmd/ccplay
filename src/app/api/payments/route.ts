@@ -28,7 +28,17 @@ const PLANS = {
     price: 49.99,
     credits: -1, // Unlimited
     priceId: process.env.STRIPE_CREATIVE_GALAXY_PRICE_ID
-    }
+    },
+  'sparkle-unicorn-pack': {
+    credits: 100,
+    name: 'Sparkle Unicorn Pack',
+    priceId: process.env.STRIPE_JJ_FUN_PACK_PRICE_ID
+  },
+  'dragon-adventure-pack': {
+    credits: 250,
+    name: 'Dragon Adventure Pack',
+    priceId: process.env.STRIPE_YOYO_ADVENTURE_PACK_PRICE_ID
+  }
 };
 
 export async function POST(req: Request) {

@@ -4,9 +4,11 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useAuth } from '@/contexts/AuthContext'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSubscription } from "@/hooks/useSubscription"
+import { motion } from "framer-motion"
+import { supabase } from "@/lib/supabase"
 
 const navigationItems = [
   {
@@ -122,7 +124,60 @@ export function Header() {
     const { user, signOut } = useAuth()
     const router = useRouter()
     const [showDropdown, setShowDropdown] = useState(false)
-    const { subscriptionStatus } = useSubscription();
+    const { subscriptionStatus, refreshSubscription } = useSubscription();
+    const [prevCredits, setPrevCredits] = useState(subscriptionStatus?.creditsLeft || -1);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    // // Effect to handle credit changes and trigger animation
+    // useEffect(() => {
+    //     if (subscriptionStatus?.creditsLeft !== undefined && prevCredits !== subscriptionStatus.creditsLeft) {
+    //         setIsAnimating(true);
+    //         setPrevCredits(subscriptionStatus.creditsLeft);
+    //         const timer = setTimeout(() => setIsAnimating(false), 1000);
+    //         return () => clearTimeout(timer);
+    //     }
+    // }, [subscriptionStatus?.creditsLeft, prevCredits]);
+
+    // Effect to setup real-time subscription updates
+    useEffect(() => {
+        if (!user?.id) return;
+
+        // Initial fetch
+        refreshSubscription();
+
+        console.log('refreshed subscription', subscriptionStatus?.creditsLeft)
+
+        // // Subscribe to real-time changes
+        // const subscription = supabase
+        //     .channel('credits_changes')
+        //     .on('postgres_changes', {
+        //         event: '*',
+        //         schema: 'public',
+        //         table: 'subscriptions',
+        //         filter: `user_id=eq.${user.id}`
+        //     }, () => {
+        //         refreshSubscription();
+        //     })
+        //     .subscribe();
+
+        // return () => {
+        //     subscription.unsubscribe();
+        // };
+    }, [user?.id, refreshSubscription]);
 
     const handleSignOut = async () => {
         try {
@@ -137,10 +192,21 @@ export function Header() {
         <header className="container mx-auto py-2 px-4 flex items-center justify-between">
             <Link href="/">
             <div className="flex items-center gap-2">
-                <div className="transform -rotate-6 hover:rotate-0 transition-all duration-300">
+                <motion.div
+                    initial={{ rotate: -6 }}
+                    animate={{ 
+                        rotate: [-6, 0, -6],
+                        y: [0, -5, 0]
+                    }}
+                    transition={{ 
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                >
                     <Image
                         src="/logo.png"
-                        alt="Cocomelon Play Logo"
+                        alt="Creative Play Logo"
                         width={70}
                         height={70}
                         quality={100}
@@ -150,7 +216,7 @@ export function Header() {
                         style={{ backgroundColor: 'transparent' }}
                         unoptimized
                     />
-                </div>
+                </motion.div>
                 <span
                     className="text-xl font-extrabold text-[#FF4D79]"
                     style={{ fontFamily: "'Comic Sans MS', 'Bubblegum Sans', cursive" }}
@@ -175,71 +241,115 @@ export function Header() {
                 ))}
             </nav>
             <div className="flex items-center gap-2">
-                <Button variant="outline" className="bg-white border border-[#FF4D79] text-[#FF4D79] hover:bg-[#FF4D79] 
-                             hover:text-white rounded-full px-4 py-2 text-lg font-medium text-sm shadow-lg 
-                             transition-transform hover:scale-105 flex items-center gap-2">
-                    {subscriptionStatus?.creditsLeft} Credits
-                </Button>
+                <motion.div
+                    animate={isAnimating ? {
+                        scale: [1, 1.2, 0.9, 1.1, 1],
+                        rotate: [0, 10, -10, 5, 0],
+                    } : { scale: 1, rotate: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="bg-white border border-[#FF4D79] text-[#FF4D79] hover:bg-[#FF4D79] 
+                             hover:text-white rounded-full px-4 py-2 text-sm font-medium shadow-lg 
+                             transition-all hover:scale-105 flex items-center gap-2"
+                >
+                    {subscriptionStatus?.creditsLeft || -1} Credits
+                </motion.div>
             </div>
             <div className="flex items-center gap-2">
                 {user ? (
-                    <div className="relative">
+                    <div className="relative" ref={dropdownRef}>
                         
                         <button
                             onClick={() => setShowDropdown(!showDropdown)}
                             className="flex items-center gap-2 bg-white hover:bg-gray-50 text-[#4A66E0] 
                                        px-2 py-1.5 rounded-full font-medium transition-all duration-300 
-                                       shadow-sm"
+                                       shadow-sm hover:shadow-md"
                         >
-                            <div className="w-6 h-6 bg-[#4A66E0] rounded-full flex items-center justify-center">
+                            <div className="w-8 h-8 bg-gradient-to-br from-[#FF4D79] to-[#4A66E0] rounded-full flex items-center justify-center">
                                 <span className="text-white text-sm font-bold">
                                     {user.email?.[0].toUpperCase()}
                                 </span>
                             </div>
                             <span className="hidden md:inline text-sm">Welcome!</span>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className={`transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`}
+                            <motion.div
+                                animate={{ rotate: showDropdown ? 180 : 0 }}
+                                transition={{ duration: 0.2 }}
                             >
-                                <path d="m6 9 6 6 6-6"/>
-                            </svg>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="m6 9 6 6 6-6"/>
+                                </svg>
+                            </motion.div>
                         </button>
 
                         {showDropdown && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-                                <div className="px-4 py-2 border-b border-gray-100">
-                                    <p className="text-sm text-gray-600">Signed in as</p>
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl py-3 z-50 border-2 border-[#FFD747]"
+                            >
+                                <div className="px-4 py-2 border-b-2 border-[#FFD747]/20">
+                                    <p className="text-sm text-gray-600">Playing as</p>
                                     <p className="text-sm font-medium text-gray-900 truncate">
                                         {user.email}
                                     </p>
                                 </div>
-                                <Link
-                                    href="/app"
-                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                >
-                                    Go to App
-                                </Link>
-                                <Link
-                                    href="/app/profile"
-                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                >
-                                    Profile Settings
-                                </Link>
-                                <button
-                                    onClick={handleSignOut}
-                                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                                >
-                                    Sign Out
-                                </button>
-                            </div>
+                                <div className="py-2 space-y-1">
+                                    <Link
+                                        href="/app/profile"
+                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#FFD747]/20 transition-colors"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <circle cx="12" cy="8" r="5"/>
+                                            <path d="M20 21a8 8 0 1 0-16 0"/>
+                                        </svg>
+                                        Profile
+                                    </Link>
+                                    <Link
+                                        href="/app/settings"
+                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#FFD747]/20 transition-colors"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                        Settings
+                                    </Link>
+                                    <Link
+                                        href="/app/notifications"
+                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#FFD747]/20 transition-colors"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                                            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                                        </svg>
+                                        Notifications
+                                    </Link>
+                                    <div className="px-3 pt-2 pb-1">
+                                        <div className="border-t-2 border-[#FFD747]/20"></div>
+                                    </div>
+                                    <button
+                                        onClick={handleSignOut}
+                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                            <polyline points="16 17 21 12 16 7"/>
+                                            <line x1="21" y1="12" x2="9" y2="12"/>
+                                        </svg>
+                                        Sign Out
+                                    </button>
+                                </div>
+                            </motion.div>
                         )}
                     </div>
                 ) : (

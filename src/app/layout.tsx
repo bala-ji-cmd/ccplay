@@ -7,9 +7,9 @@ import { AuthProvider } from "@/contexts/AuthContext"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Cocomelon Play - AI Drawing App for Kids",
+  title: "Creative Play - AI Drawing App for Kids",
   description:
-    "Draw, learn, and animate with your favorite Cocomelon characters! An AI-powered drawing app designed for young children.",
+    "Draw, learn, and animate with magical creatures and fantasy characters! An AI-powered drawing app designed for young children.",
 }
 
 export default function RootLayout({

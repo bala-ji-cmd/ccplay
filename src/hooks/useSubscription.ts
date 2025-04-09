@@ -53,7 +53,7 @@ export function useSubscription() {
         return false;
       }
 
-      // Update local state
+      // Update local state immediately
       setSubscriptionStatus(prev => prev ? {
         ...prev,
         isActive: false,
@@ -63,16 +63,28 @@ export function useSubscription() {
       return false;
     }
 
+    // Update local state immediately before the API call
+    const newCreditsLeft = subscriptionStatus.creditsLeft - amount;
+    setSubscriptionStatus(prev => prev ? {
+      ...prev,
+      creditsLeft: newCreditsLeft
+    } : null);
+
     // Deduct credits and log usage
     const { error: updateError } = await supabase
       .from('subscriptions')
       .update({ 
-        credits_left: subscriptionStatus.creditsLeft - amount 
+        credits_left: newCreditsLeft
       })
       .eq('user_id', user.id);
 
     if (updateError) {
       console.error('Error updating credits:', updateError);
+      // Revert local state on error
+      setSubscriptionStatus(prev => prev ? {
+        ...prev,
+        creditsLeft: subscriptionStatus.creditsLeft
+      } : null);
       return false;
     }
 
@@ -89,12 +101,6 @@ export function useSubscription() {
     if (usageError) {
       console.error('Error logging credit usage:', usageError);
     }
-
-    // Update local state
-    setSubscriptionStatus(prev => prev ? {
-      ...prev,
-      creditsLeft: prev.creditsLeft - amount
-    } : null);
 
     return true;
   };

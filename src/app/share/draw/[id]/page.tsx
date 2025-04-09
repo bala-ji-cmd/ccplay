@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
-import { Share2, Copy, Twitter, MessageCircle } from 'lucide-react';
+import { Share2, Copy, Twitter, MessageCircle, Home, Pencil } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Loader } from "@/components/ui/loader";
+import Link from 'next/link';
 
 export default function SharePage({ params }: { params: { id: string } }) {
   const [imageData, setImageData] = useState<{
@@ -16,6 +17,15 @@ export default function SharePage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      // You could add a toast notification here
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+    }
+  };
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -62,6 +72,7 @@ export default function SharePage({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 via-pink-50 to-yellow-50 py-12 px-4">
+   
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -107,39 +118,43 @@ export default function SharePage({ params }: { params: { id: string } }) {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-4 justify-center mb-8">
+            <div className="flex flex-wrap gap-4 justify-center mt-8">
               <motion.button
+                onClick={handleCopyLink}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full px-6 py-3 flex items-center gap-2 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={async () => {
-                  await navigator.clipboard.writeText(window.location.href);
-                  // Show copied tooltip
-                }}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:shadow-lg transition-shadow"
+                style={{ fontFamily: "'Comic Sans MS', 'Bubblegum Sans', cursive" }}
               >
                 <Copy className="w-5 h-5" />
-                Share the Magic
+                Copy Link
               </motion.button>
-
               <motion.a
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent('Check out this magical drawing! ✨')}`}
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                  'Check out my drawing! 🎨'
+                )}&url=${encodeURIComponent(
+                  `${window.location.origin}/share/draw/${params.id}`
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-6 py-3 bg-[#1DA1F2] text-white rounded-full hover:shadow-lg transition-shadow"
+                className="bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-full px-6 py-3 flex items-center gap-2 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                style={{ fontFamily: "'Comic Sans MS', 'Bubblegum Sans', cursive" }}
               >
                 <Twitter className="w-5 h-5" />
-                Tweet the Magic
+                Share on Twitter
               </motion.a>
-
               <motion.a
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                href={`https://wa.me/?text=${encodeURIComponent(`✨ Look at this magical drawing! ${window.location.href}`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(
+                  `Check out my drawing! 🎨 ${window.location.origin}/share/draw/${params.id}`
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-6 py-3 bg-[#25D366] text-white rounded-full hover:shadow-lg transition-shadow"
+                className="bg-gradient-to-r from-green-400 to-green-600 text-white rounded-full px-6 py-3 flex items-center gap-2 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                style={{ fontFamily: "'Comic Sans MS', 'Bubblegum Sans', cursive" }}
               >
                 <MessageCircle className="w-5 h-5" />
                 Share on WhatsApp

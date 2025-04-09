@@ -51,6 +51,9 @@ export const config = {
     '/auth/callback',
     '/api/auth/callback',
     '/api/draw/generate',
-    '/api/learn/generate'
+    '/api/learn/generate',
+    '/api/user/drawings',
+    '/api/user/learnings',
+    '/api/user/usage'
   ]
 } 
