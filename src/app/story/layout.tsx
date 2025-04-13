@@ -2,11 +2,11 @@ import { Header } from "@/components/landing/Header"
 import { Footer } from "@/components/landing/Footer"
 
 export const metadata = {
-  title: 'Pricing - Cocomelon Play',
-  description: 'Choose the perfect plan for your little artist and start creating Cocomelon masterpieces today!',
+  title: 'Story with AI - Cocomelon Play',
+  description: 'Create personalized bedtime stories with AI!',
 }
 
-export default function LearnLayout({
+export default function StoryLayout({
   children,
 }: {
   children: React.ReactNode

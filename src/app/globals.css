@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -121,6 +124,56 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+  }
+
+  /* Custom fonts for story page */
+  .font-display {
+    font-family: 'Fredoka', sans-serif;
+  }
+
+  .font-story {
+    font-family: 'Quicksand', sans-serif;
+  }
+
+  /* Article styles */
+  .prose {
+    max-width: none;
+  }
+
+  .prose p {
+    margin-bottom: 1rem;
+    text-align: justify;
+  }
+
+  .prose h1 {
+    letter-spacing: -0.025em;
+  }
+
+  /* Custom scrollbar for story content */
+  .overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+
+  /* Drop cap styles */
+  .first-letter\:text-5xl::first-letter {
+    font-size: 3.5rem;
+    padding: 0.2em 0.1em 0 0;
+    font-family: 'Fredoka', sans-serif;
+    color: #1a1a1a;
   }
 }
 

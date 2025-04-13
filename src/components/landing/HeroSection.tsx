@@ -72,8 +72,7 @@ export function HeroSection() {
               <div className="flex flex-col sm:flex-row gap-6 pt-4 justify-center md:justify-start">
                 <Button 
                   onClick={handleDrawClick}
-                  className="bg-[#FFD747] hover:bg-[#FFDF6B] text-[#4A66E0] rounded-full px-6 py-3 
-                  text-lg font-bold shadow-lg transition-transform hover:scale-105 
+                  className="bg-[#FFD747] hover:bg-[#FFDF6B] text-[#4A66E0] rounded-full px-8 py-8 text-xl font-bold shadow-lg transition-transform hover:scale-105 
                   border-4 border-white flex items-center gap-2"
 
                 >
@@ -82,7 +81,7 @@ export function HeroSection() {
                 <Button
                   variant="outline"
                   className="bg-white border-4 border-[#FF4D79] text-[#FF4D79] hover:bg-[#FF4D79] 
-                             hover:text-white rounded-full px-6 py-3 text-lg font-bold shadow-lg 
+                             hover:text-white rounded-full px-8 py-8 text-xl font-bold shadow-lg 
                              transition-transform hover:scale-105 flex items-center gap-2"
                 >
                   <svg

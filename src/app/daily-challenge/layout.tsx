@@ -3,7 +3,7 @@ import { Header } from "@/components/landing/Header"
 import { Footer } from "@/components/landing/Footer"
 
 export const metadata: Metadata = {
-  title: 'Draw with AI - Cocomelon Play',
+  title: 'Daily Challenge - Cocomelon Play',
 }
 
 export default function DailyChallengeLayout({

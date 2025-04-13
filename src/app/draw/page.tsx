@@ -192,7 +192,7 @@ export default function DrawPage() {
 
   // Replace the existing useEffect with this one
   useEffect(() => {
-    console.log('subscriptionStatus',subscriptionStatus);
+    // console.log('subscriptionStatus',subscriptionStatus);
     if (subscriptionStatus) {
       // Show subscription modal if subscription is not valid
       if (!subscriptionStatus.isActive) {
@@ -401,7 +401,6 @@ export default function DrawPage() {
     setCanvasHistory(prev => [...prev.slice(0, currentHistoryIndex + 1), currentDrawing]);
     setCurrentHistoryIndex(prev => prev + 1);
     setHasCanvasContent(true);
-    setHasUnsavedChanges(true);
   };
 
   const clearCanvas = () => {
@@ -482,23 +481,37 @@ export default function DrawPage() {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      const image = canvas.toDataURL().replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
+      const imageData = canvas.toDataURL('image/png');
       
-      const { data, error } = await supabase
+      // Save drawing
+      const { data: drawingData, error: drawingError } = await supabase
         .from('user_images')
-        .insert([{
+        .insert([{ 
           user_id: user.id,
-          drawing_name: drawingName,
-          image: image
+          image_data: imageData,
+          drawing_name: drawingName
         }])
         .select('id')
         .single();
-
-      if (error) throw error;
       
-      setShareId(data.id);
-      setIsSaved(true);
-      return data;
+      
+
+      if (drawingError) throw drawingError;
+      console.log('saved drawing');
+      // console.log('[before] showSubscriptionModal',showSubscriptionModal);
+      // Check subscription status and use credits
+      if (!(await useCredits(25, 'draw'))) {
+        setShowSubscriptionModal(true);
+        return;
+      } else {
+        console.log('used credits');
+      }
+      // console.log('[after]showSubscriptionModal',showSubscriptionModal);
+
+      
+      fireConfetti();
+
+      return drawingData;
 
     } catch (error) {
       console.error('Error saving drawing:', error);

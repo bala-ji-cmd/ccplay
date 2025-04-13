@@ -51,8 +51,8 @@ const navigationItems = [
     ),
   },
   {
-    name: 'Animate with AI',
-    href: '/animate',
+    name: 'Story with AI',
+    href: '/story',
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -93,31 +93,31 @@ const navigationItems = [
       </svg>
     ),
   },
-  {
-    name: 'Pricing',
-    href: '/pricing',
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M2.5 19.5L22 19.5" />
-        <path d="M3.5 5.5L7.5 9.5" />
-        <path d="M8.5 4.5L6.5 10.5" />
-        <path d="M11.5 4.5L9.5 10.5" />
-        <path d="M14.5 4.5L12.5 10.5" />
-        <path d="M17.5 4.5L15.5 10.5" />
-        <path d="M20.5 4.5L18.5 10.5" />
-      </svg>
-    ),
-  },
+//   {
+//     name: 'Pricing',
+//     href: '/pricing',
+//     icon: (
+//       <svg
+//         xmlns="http://www.w3.org/2000/svg"
+//         width="20"
+//         height="20"
+//         viewBox="0 0 24 24"
+//         fill="none"
+//         stroke="currentColor"
+//         strokeWidth="2"
+//         strokeLinecap="round"
+//         strokeLinejoin="round"
+//       >
+//         <path d="M2.5 19.5L22 19.5" />
+//         <path d="M3.5 5.5L7.5 9.5" />
+//         <path d="M8.5 4.5L6.5 10.5" />
+//         <path d="M11.5 4.5L9.5 10.5" />
+//         <path d="M14.5 4.5L12.5 10.5" />
+//         <path d="M17.5 4.5L15.5 10.5" />
+//         <path d="M20.5 4.5L18.5 10.5" />
+//       </svg>
+//     ),
+//   },
 ];
 
 export function Header() {
@@ -206,7 +206,7 @@ export function Header() {
                 >
                     <Image
                         src="/logo.png"
-                        alt="Creative Play Logo"
+                        alt="Cocomelon Play Logo"
                         width={70}
                         height={70}
                         quality={100}
@@ -240,20 +240,23 @@ export function Header() {
                     </Link>
                 ))}
             </nav>
-            <div className="flex items-center gap-2">
-                <motion.div
-                    animate={isAnimating ? {
-                        scale: [1, 1.2, 0.9, 1.1, 1],
-                        rotate: [0, 10, -10, 5, 0],
-                    } : { scale: 1, rotate: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="bg-white border border-[#FF4D79] text-[#FF4D79] hover:bg-[#FF4D79] 
-                             hover:text-white rounded-full px-4 py-2 text-sm font-medium shadow-lg 
-                             transition-all hover:scale-105 flex items-center gap-2"
-                >
-                    {subscriptionStatus?.creditsLeft || -1} Credits
-                </motion.div>
-            </div>
+            {user && (
+
+<div className="flex items-center gap-2">
+<motion.div
+    animate={isAnimating ? {
+        scale: [1, 1.2, 0.9, 1.1, 1],
+        rotate: [0, 10, -10, 5, 0],
+    } : { scale: 1, rotate: 0 }}
+    transition={{ duration: 0.5 }}
+    className="bg-white border border-[#FF4D79] text-[#FF4D79] hover:bg-[#FF4D79] 
+             hover:text-white rounded-full px-4 py-2 text-sm font-medium shadow-lg 
+             transition-all hover:scale-105 flex items-center gap-2"
+>
+    {subscriptionStatus?.creditsLeft || -1} Credits
+</motion.div>
+</div>
+            )}
             <div className="flex items-center gap-2">
                 {user ? (
                     <div className="relative" ref={dropdownRef}>
