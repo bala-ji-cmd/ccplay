@@ -15,11 +15,11 @@ export function Loader({ size = 'md', fullScreen = false }: LoaderProps) {
   const loaderContent = (
     <div className="animate-bounce">
       <div className={`relative ${sizeMap[size]}`}>
-        <div className="animate-spin absolute inset-0 border-4 border-t-purple-500 border-r-pink-500 border-b-yellow-500 border-l-blue-500 rounded-full"></div>
+        {/* <div className="animate-spin absolute inset-0 border-4 border-t-purple-500 border-r-pink-500 border-b-yellow-500 border-l-blue-500 rounded-full"></div> */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`${size === 'sm' ? 'text-lg' : size === 'md' ? 'text-xl' : 'text-2xl'}`}>
-            ✨
-          </span>
+        <div className="absolute w-full h-full animate-bounce">
+                    <img src="/logo.png?height=66&width=66" alt="CCPlay the master" className="w-full h-full" />
+                  </div>
         </div>
       </div>
     </div>

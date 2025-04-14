@@ -1,4 +1,4 @@
-import type React from "react"
+import type { Metadata } from "next"
 import "@/app/globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -6,10 +6,28 @@ import { AuthProvider } from "@/contexts/AuthContext"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata = {
-  title: "Cocomelon Play - AI Drawing App for Kids",
-  description:
-    "Draw, learn, and animate with magical creatures and fantasy characters! An AI-powered drawing app designed for young children.",
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
+  title: "Cocomelon Play - Draw, Learn & Animate with Cocomelon!",
+  description: "Join JJ and friends in a world of creativity! Draw, learn, and animate with Cocomelon's fun educational platform for kids.",
+  openGraph: {
+    title: "Cocomelon Play - Draw, Learn & Animate with Cocomelon!",
+    description: "Join JJ and friends in a world of creativity! Draw, learn, and animate with Cocomelon's fun educational platform for kids.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Cocomelon Play - Draw, Learn & Animate with Cocomelon!",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cocomelon Play - Draw, Learn & Animate with Cocomelon!",
+    description: "Join JJ and friends in a world of creativity! Draw, learn, and animate with Cocomelon's fun educational platform for kids.",
+    images: ["/og-image.png"],
+  },
 }
 
 export default function RootLayout({

@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DrawingCanvasProps {
   currentImage: string;
@@ -28,11 +28,11 @@ export function DrawingCanvas({ currentImage, currentInstruction, stepNumber, to
   }, [stepNumber, totalSteps, onStepChange]);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-4 border-2 border-purple-100">
+    <div className="bg-white rounded-2xl shadow-lg p-6 border-[6px] border-[#FFD900]">
       {/* Canvas Container */}
       <div className="relative w-full max-w-[960px] mx-auto" style={{ aspectRatio: '16/9' }}>
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-100 via-pink-100 to-yellow-100 rounded-xl transform -rotate-1"></div>
-        <div className="relative bg-white rounded-xl p-3 transform rotate-1 hover:rotate-0 transition-transform duration-300 h-full">
+        <div className="absolute inset-0 bg-[#FFF9E5] rounded-2xl transform -rotate-1"></div>
+        <div className="relative bg-white rounded-2xl p-3 transform rotate-1 hover:rotate-0 transition-transform duration-300 h-full border-4 border-[#E5E5E5]">
           {currentImage && (
             <img
               src={`data:image/png;base64,${currentImage}`}
@@ -50,28 +50,36 @@ export function DrawingCanvas({ currentImage, currentInstruction, stepNumber, to
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         key={stepNumber}
-        className="text-center my-4"
+        className="text-center my-6"
       >
         <motion.div
           initial={{ scale: 0.9 }}
           animate={{ scale: 1 }}
-          className="inline-block bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full px-5 py-2 mb-3"
+          className="inline-block bg-[#8549BA] text-white rounded-2xl px-6 py-3 mb-4 border-b-4 border-[#6B3A9C]"
         >
-          <h3 className="text-xl font-bold">
+          <h3 
+            className="text-xl font-bold"
+            style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+          >
             Step {stepNumber + 1} of {totalSteps}
           </h3>
         </motion.div>
-        <p className="text-lg text-gray-700 font-medium">{currentInstruction}</p>
+        <p 
+          className="text-lg text-[#4B4B4B] font-medium px-4 py-2 bg-[#FFF9E5] rounded-2xl inline-block border-2 border-[#FFD900]"
+          style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+        >
+          {currentInstruction}
+        </p>
       </motion.div>
 
       {/* Navigation Buttons */}
-      <div className="flex justify-center gap-4 my-4">
+      <div className="flex justify-center gap-6 my-6">
         <motion.button
           onClick={() => onStepChange(stepNumber - 1)}
           disabled={stepNumber <= 0}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="p-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          className="p-4 rounded-full bg-[#1CB0F6] text-white hover:bg-[#1BA0E1] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border-b-4 border-[#1BA0E1] disabled:border-b-0"
         >
           <ChevronLeft className="w-6 h-6" />
         </motion.button>
@@ -80,23 +88,23 @@ export function DrawingCanvas({ currentImage, currentInstruction, stepNumber, to
           disabled={stepNumber >= totalSteps - 1}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="p-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          className="p-4 rounded-full bg-[#58CC02] text-white hover:bg-[#46A302] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 border-b-4 border-[#46A302] disabled:border-b-0"
         >
           <ChevronRight className="w-6 h-6" />
         </motion.button>
       </div>
 
       {/* Progress Indicator */}
-      <div className="mt-4">
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div className="mt-6">
+        <div className="h-4 bg-[#E5E5E5] rounded-full overflow-hidden border-2 border-[#DDDDDD]">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${((stepNumber + 1) / totalSteps) * 100}%` }}
-            className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500"
+            className="h-full bg-[#58CC02]"
             transition={{ duration: 0.3 }}
           />
         </div>
       </div>
     </div>
   );
-} 
+}

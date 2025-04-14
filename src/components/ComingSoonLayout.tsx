@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { memo } from "react"
 
 interface ComingSoonProps {
   title: string
@@ -12,7 +13,35 @@ interface ComingSoonProps {
   icon: React.ReactNode
 }
 
-export function ComingSoonLayout({ title, subtitle, description, features, icon }: ComingSoonProps) {
+const FeatureItem = memo(({ feature }: { feature: string }) => (
+  <li className="flex items-center gap-3 text-[#5D5D5D] bg-blue-50 p-4 rounded-xl">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#FF4D79"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+      <path d="m9 12 2 2 4-4"/>
+    </svg>
+    {feature}
+  </li>
+))
+
+FeatureItem.displayName = 'FeatureItem'
+
+export const ComingSoonLayout = memo(function ComingSoonLayout({ 
+  title, 
+  subtitle, 
+  description, 
+  features, 
+  icon 
+}: ComingSoonProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50">
       <div className="container mx-auto px-4 py-16">
@@ -43,30 +72,14 @@ export function ComingSoonLayout({ title, subtitle, description, features, icon 
             </h2>
             <ul className="space-y-4">
               {features.map((feature, index) => (
-                <li key={index} className="flex items-center gap-3 text-[#5D5D5D] bg-blue-50 p-4 rounded-xl">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#FF4D79"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-                    <path d="m9 12 2 2 4-4"/>
-                  </svg>
-                  {feature}
-                </li>
+                <FeatureItem key={index} feature={feature} />
               ))}
             </ul>
           </div>
 
           {/* Back Button */}
           <div className="text-center mt-8">
-            <Link href="/">
+            <Link href="/" prefetch={true}>
               <Button className="bg-[#4A66E0] hover:bg-[#3A56D0] text-white rounded-full px-6 py-2 font-bold">
                 Back to Home
               </Button>
@@ -76,4 +89,6 @@ export function ComingSoonLayout({ title, subtitle, description, features, icon 
       </div>
     </div>
   )
-} 
+})
+
+ComingSoonLayout.displayName = 'ComingSoonLayout' 

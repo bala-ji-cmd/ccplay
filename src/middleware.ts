@@ -54,6 +54,8 @@ export const config = {
     '/api/learn/generate',
     '/api/user/drawings',
     '/api/user/learnings',
-    '/api/user/usage'
+    '/api/user/usage',
+    '/api/captions',
+    '/api/cron/compute-scores'
   ]
 } 

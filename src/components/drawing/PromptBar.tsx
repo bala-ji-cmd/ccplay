@@ -18,23 +18,25 @@ export function PromptBar({ onSubmit, isGenerating, onNewDrawing }: PromptBarPro
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl p-4 shadow-lg">
-      <div className="flex gap-3">
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 shadow-lg border-[6px] border-[#FFD900]">
+      <div className="flex flex-col sm:flex-row gap-4">
         <input
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="What would you like to draw? 🐶 🐱 🌈"
-          className="flex-1 text-lg rounded-full px-6 py-3 border-2 border-purple-200 focus:border-purple-400 focus:outline-none"
+          className="flex-1 text-lg rounded-2xl px-6 py-4 border-4 border-[#E5E5E5] focus:border-[#1CB0F6] focus:outline-none"
+          style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
         />
         <button
           type="submit" // Set the button type to submit
           disabled={isGenerating || !inputValue}
-          className="bg-purple-500 hover:bg-purple-600 text-white rounded-full px-8 py-3 font-semibold transition-colors disabled:opacity-50"
+          className="bg-[#58CC02] hover:bg-[#46A302] text-white rounded-2xl px-8 py-4 font-bold transition-colors disabled:opacity-50 border-b-4 border-[#46A302] text-lg shadow-md"
+          style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
         >
           {isGenerating ? "Creating..." : "Let's Draw! ✨"}
         </button>
       </div>
     </form>
   );
-} 
+}

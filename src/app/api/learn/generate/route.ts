@@ -136,12 +136,12 @@ By ensuring **bold strokes, high resolution, and structured simplicity**, kids w
         }];
 
 
-        const instructions = [`1️⃣ Start with the simplest shape – Begin with basic circles, squares, or lines to outline the structure.`,
-            `2️⃣ Add more structure – Introduce additional simple shapes to develop the main form.`,
-            `3️⃣ Define key features – Outline recognizable features while keeping it minimal.`,
-            `4️⃣ Refine the details – Enhance proportions slightly, but keep it simple.`,
-            `5️⃣ Final touches – Add any small but important finishing elements.`,
-            `6️⃣ Complete and color – Encourage creativity by suggesting fun ways to color or customize the drawing.`]
+        const instructions = [`Start with the simplest shape – Begin with basic circles, squares, or lines to outline the structure.`,
+            `Add more structure – Introduce additional simple shapes to develop the main form.`,
+            `Define key features – Outline recognizable features while keeping it minimal.`,
+            `Refine the details – Enhance proportions slightly, but keep it simple.`,
+            `Final touches – Add any small but important finishing elements.`,
+            `Complete and color – Encourage creativity by suggesting fun ways to color or customize the drawing.`]
 
 
 

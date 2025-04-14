@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/generate-daily-challenge",
+      "schedule": "30 23 * * *"
+    },
+    {
+      "path": "/api/cron/compute-scores",
+      "schedule": "45 23 * * *"
+    }
+  ]
+} 

@@ -4,6 +4,11 @@ import { Footer } from "@/components/landing/Footer"
 
 export const metadata: Metadata = {
   title: 'Daily Challenge - Cocomelon Play',
+  description: 'Complete fun daily challenges with JJ and earn special rewards!',
+  openGraph: {
+    title: 'Daily Challenge - Cocomelon Play',
+    description: 'Complete fun daily challenges with JJ and earn special rewards!',
+  },
 }
 
 export default function DailyChallengeLayout({
@@ -14,7 +19,7 @@ export default function DailyChallengeLayout({
   return (
     <>
       <Header />
-      <main className="pt-1">{children}</main>
+      <main className="pt-1 min-h-[calc(100vh-160px)]">{children}</main>
       <Footer />
     </>
   )

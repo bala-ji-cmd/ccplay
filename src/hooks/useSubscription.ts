@@ -38,7 +38,7 @@ export function useSubscription() {
     };
   };
 
-  const useCredits = async (amount: number, usageType: 'draw' | 'learn' | 'active' | 'story') => {
+  const useCredits = async (amount: number, usageType: 'draw' | 'learn' | 'story') => {
     if (!user || !subscriptionStatus) return false;
 
     if (subscriptionStatus.creditsLeft < amount) {

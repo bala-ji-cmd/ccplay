@@ -21,40 +21,37 @@ export async function POST(request: Request) {
             .from('credit_usage')
             .select('*')
             .eq('user_id', userId)
-            .gte('usage_date', oneWeekAgo.toISOString())
-            .order('usage_date', { ascending: true })
+            // .gte('usage_date', oneWeekAgo.toISOString())
+            .order('usage_date', { ascending: false })
 
         if (creditUsageError) {
             return NextResponse.json({ error: creditUsageError.message }, { status: 500 })
         }
 
-        // Process usage data by day
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-        const usageByDay: { [key: string]: number } = {}
-        
-        // Initialize all days with 0 minutes
-        dayNames.forEach(day => {
-            usageByDay[day] = 0
-        })
-        
-        // Aggregate usage data by day
-        if (creditUsage) {
-            creditUsage.forEach(usage => {
-                const date = new Date(usage.usage_date)
-                const dayIndex = date.getUTCDay()
-                const day = dayNames[dayIndex]
-                usageByDay[day] += usage.credits_used || 0
-            })
-        }
+
+        // Group usage by date
+        const usageByDate = creditUsage.reduce((acc: { [key: string]: number }, log) => {
+            const date = new Date(log.usage_date).toISOString().split('T')[0];
+            acc[date] = (acc[date] || 0) + log.credits_used;
+            return acc;
+        }, {});
+
+        // Get last 7 days of data
+        const last7Days = Array.from({ length: 7 }, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            return date.toISOString().split('T')[0];
+        }).reverse();
         
         // Format data for chart
-        const weeklyData = dayNames.map(day => ({
-            day,
-            minutes: usageByDay[day]
-        }))
+        const weeklyData = last7Days.map(date => ({
+            date: date.split('-').slice(2,3).concat('2025-04-07'.split('-')[1]).join('/'),
+            minutes: usageByDate[date] || 0
+        }));
+        
         
         // Get recent activity (latest 5)
-        const recentActivity = creditUsage ? creditUsage.slice(creditUsage.length - 5, creditUsage.length) : []
+        const recentActivity = creditUsage ? creditUsage.slice(0, 5) : []
 
         return NextResponse.json({ 
             weeklyData,

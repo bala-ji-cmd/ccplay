@@ -13,22 +13,27 @@ export default function Home() {
   return (
     <>
       <Header />
-      <main className="pt-1">
+      
+      <main >
         <div className="overflow-hidden">
           <HeroSection />
           <BouncingWatermelonDivider/>
           <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center">Loading solutions...</div>}>
             <PainPointSolution/>
           </Suspense>
+          <BouncingWatermelonDivider/>
           <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center">Loading gallery...</div>}>
             <FeaturedDrawings/>
           </Suspense>
+          <BouncingWatermelonDivider/>
           <Suspense fallback={<div className="min-h-[300px] flex items-center justify-center">Loading testimonials...</div>}>
             <Testimonial/>
           </Suspense>
+          <BouncingWatermelonDivider/>
           <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center">Loading pricing...</div>}>
             <Pricing/>
           </Suspense>
+          <BouncingWatermelonDivider/>
           <Suspense fallback={<div className="min-h-[300px] flex items-center justify-center">Loading FAQ...</div>}>
             <Faq/>
           </Suspense>

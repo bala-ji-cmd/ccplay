@@ -7,9 +7,8 @@ import { WarningModal } from "@/components/ui/WarningModal";
 import { DrawingCanvas } from "@/components/drawing/DrawingCanvas";
 import { PromptBar } from "@/components/drawing/PromptBar";
 import { StepGallery } from "@/components/drawing/StepGallery";
-// import { ShareDownload } from "@/components/drawing/ShareDownload";
 import { motion } from "framer-motion";
-import { Download, Share2, Copy, Twitter, MessageCircle, X, File } from "lucide-react";
+import { Download, Share2, Copy, Twitter, MessageCircle, X, File } from 'lucide-react';
 import { useRouter } from "next/navigation";
 import { Loader } from "@/components/ui/loader";
 import { supabase } from '@/lib/supabase';
@@ -24,18 +23,8 @@ interface Step {
   image?: string;
 }
 
-const styles = `
-  .action-button-icon {
-    @apply p-3 rounded-full bg-purple-100 text-purple-600 hover:bg-purple-200 transition-colors;
-  }
-
-  .action-button {
-    @apply px-6 py-3 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 font-medium;
-  }
-`;
-
 export default function LearnPage() {
-  const { subscriptionStatus,useCredits, refreshSubscription } = useSubscription();
+  const { subscriptionStatus, useCredits, refreshSubscription } = useSubscription();
   const { user } = useAuth();
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
@@ -138,7 +127,7 @@ export default function LearnPage() {
       }
     } catch (error) {
       console.error('Error generating drawing steps:', error);
-      setWarningMessage('Something went wrong. Please try again!');
+      setWarningMessage('Server is busy. Please try again later!');
       setShowWarningModal(true);
     } finally {
       setIsGenerating(false);
@@ -185,7 +174,6 @@ export default function LearnPage() {
     if (!drawingSteps.length) return;
 
     try {
-
       setIsDownloading(true);
       const zip = new JSZip();
       const folder = zip.folder(downloadFileName);
@@ -255,8 +243,6 @@ export default function LearnPage() {
         .select('id')
         .single();
 
-      
-
       if (error) throw error;
       
       setShareId(data.id);
@@ -324,11 +310,11 @@ export default function LearnPage() {
       exit={{ opacity: 0, scale: 0.9 }}
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
     >
-      <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+      <div className="bg-white rounded-2xl p-6 max-w-sm w-full border-8 border-[#FFD900]">
         <div className="flex justify-between items-start mb-4">
           <h3
-            className="text-xl font-bold"
-            style={{ fontFamily: "'Comic Sans MS', 'Bubblegum Sans', cursive" }}
+            className="text-xl font-bold text-[#4B4B4B]"
+            style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
           >
             Share your creation
           </h3>
@@ -341,7 +327,7 @@ export default function LearnPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="p-3 bg-gray-50 rounded-md flex items-center gap-2">
+          <div className="p-3 bg-[#FFF9E5] rounded-xl flex items-center gap-2 border-2 border-[#FFD900]">
             <input
               type="text"
               value={shareId ? `${window.location.origin}/share/learn/${shareId}` : ''}
@@ -354,7 +340,7 @@ export default function LearnPage() {
                   await navigator.clipboard.writeText(`${window.location.origin}/share/learn/${shareId}`);
                 }
               }}
-              className="text-purple-600 hover:text-purple-700"
+              className="text-[#1CB0F6] hover:text-[#1BA0E1]"
             >
               <Copy className="w-5 h-5" />
             </button>
@@ -365,7 +351,7 @@ export default function LearnPage() {
               href={shareId ? `https://twitter.com/intent/tweet?url=${encodeURIComponent(`${window.location.origin}/share/learn/${shareId}`)}&text=${encodeURIComponent('Check out my drawing steps!')}` : '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 p-2 bg-[#1DA1F2] text-white rounded-md hover:bg-opacity-90"
+              className="flex items-center justify-center gap-2 p-2 bg-[#1CB0F6] text-white rounded-xl hover:bg-opacity-90 font-bold border-b-2 border-[#1BA0E1]"
             >
               <Twitter className="w-5 h-5" />
               Twitter
@@ -374,19 +360,19 @@ export default function LearnPage() {
               href={shareId ? `https://wa.me/?text=${encodeURIComponent(`Check out my drawing steps! ${window.location.origin}/share/learn/${shareId}`)}` : '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 p-2 bg-[#25D366] text-white rounded-md hover:bg-opacity-90"
+              className="flex items-center justify-center gap-2 p-2 bg-[#58CC02] text-white rounded-xl hover:bg-opacity-90 font-bold border-b-2 border-[#46A302]"
             >
               <MessageCircle className="w-5 h-5" />
               WhatsApp
             </a>
           </div>
-
+          
           <button
             onClick={() => {
               setShowShareModal(false);
               setShareId(null);
             }}
-            className="w-full p-2 border border-gray-200 rounded-md hover:bg-gray-50"
+            className="w-full p-2 border-2 border-[#E5E5E5] rounded-xl hover:bg-[#F7F7F7] font-bold"
           >
             Close
           </button>
@@ -402,12 +388,12 @@ export default function LearnPage() {
       exit={{ opacity: 0, scale: 0.9 }}
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
     >
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border-8 border-[#FFD900]">
         <div className="flex justify-between items-start mb-4">
           <h3 
-                  className="text-xl font-bold text-primary"
-                  style={{ fontFamily: "'Comic Sans MS', 'Bubblegum Sans', cursive" }}
-                >
+            className="text-xl font-bold text-[#4B4B4B]"
+            style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+          >
             Save your artwork
           </h3>
           <button
@@ -424,21 +410,22 @@ export default function LearnPage() {
             value={downloadFileName}
             onChange={(e) => setDownloadFileName(e.target.value)}
             placeholder="Enter file name"
-            className="w-full px-3 py-2 border-2 border-purple-300 rounded-md focus:outline-none focus:border-purple-500 mb-4"
+            className="w-full px-4 py-3 border-4 border-[#E5E5E5] rounded-xl focus:outline-none focus:border-[#1CB0F6] mb-4"
+            style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
             autoFocus
           />
           <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setShowDownloadModal(false)}
-              className="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50"
+              className="px-4 py-2 text-sm border-2 border-[#E5E5E5] rounded-xl hover:bg-[#F7F7F7] font-bold"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isDownloading}
-              className="px-4 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 flex items-center gap-2"
+              className="px-4 py-2 text-sm bg-[#58CC02] text-white rounded-xl hover:bg-[#46A302] flex items-center gap-2 font-bold border-b-2 border-[#46A302]"
             >
               {isDownloading ? (
                 <>
@@ -456,12 +443,10 @@ export default function LearnPage() {
         </form>
       </div>
     </motion.div>
-
-  
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50 p-4">
+    <div className="min-h-screen bg-[#FFF9E5] p-4">
       {showSubscriptionModal && (
         <SubscriptionModal message="This feature is not available for your plan. Please upgrade to a higher plan to use this feature." />
       )}
@@ -501,8 +486,8 @@ export default function LearnPage() {
               className="text-center space-y-8 w-full max-w-4xl mx-auto pb-0"
             >
               <h1
-                className="text-6xl md:text-7xl font-bold text-center bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-500 text-transparent bg-clip-text w-full px-4 leading-tight pb-3"
-                style={{ fontFamily: "'Comic Sans MS', 'Bubblegum Sans', cursive" }}
+                className="text-6xl md:text-7xl font-bold text-center text-[#58CC02] w-full px-4 leading-tight pb-3"
+                style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
               >
                 Let's Create Magic!{" "}
                 <motion.span
@@ -516,13 +501,16 @@ export default function LearnPage() {
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}
-                  className="inline-block text-8xl text-yellow-500"
+                  className="inline-block text-8xl text-[#FFD900]"
                   style={{ backgroundColor: 'transparent' }}
                 >
                   ✨
                 </motion.span>
               </h1>
-              <p className="text-2xl text-purple-700 font-medium px-4 mt-8 pb">
+              <p 
+                className="text-2xl text-[#8549BA] font-bold px-4 mt-8 pb-2"
+                style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+              >
                 Ready to turn your imagination into amazing drawings? 🎨
               </p>
             </motion.div>
@@ -550,7 +538,8 @@ export default function LearnPage() {
                 <button
                   key={suggestion}
                   onClick={() => handlePromptSubmit(suggestion)}
-                  className="px-6 py-3 rounded-full bg-white shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 text-purple-600 font-medium border-2 border-purple-200"
+                  className="px-6 py-3 rounded-2xl bg-white shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 text-[#8549BA] font-bold border-4 border-[#FFD900]"
+                  style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
                 >
                   {suggestion}
                 </button>
@@ -560,22 +549,23 @@ export default function LearnPage() {
         ) : (
           <>
             <div className="max-w-6xl mx-auto space-y-6">
-              <header className="bg-white rounded-2xl p-6 shadow-lg border-2 border-purple-100">
-                <div className="flex items-center justify-between">
+              <header className="bg-white rounded-2xl p-6 shadow-lg border-6 border-[#FFD900]">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <h1
-                    className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 text-transparent bg-clip-text flex-1 text px-4"
-                    style={{ fontFamily: "'Comic Sans MS', 'Bubblegum Sans', cursive" }}
+                    className="text-4xl font-bold text-[#58CC02] flex-1 px-4"
+                    style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
                   >
                     {prompt}
                   </h1>
 
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 flex-wrap justify-center">
                     <motion.button
                       onClick={handleNewDrawing}
-                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                      className="flex items-center gap-2 px-4 py-3 bg-[#8549BA] text-white rounded-xl shadow-md hover:bg-[#6B3A9C] transition-all duration-200 font-bold border-b-4 border-[#6B3A9C]"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       title="Start a new drawing"
+                      style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -597,10 +587,11 @@ export default function LearnPage() {
 
                     <motion.button
                       onClick={handleDownload}
-                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                      className="flex items-center gap-2 px-4 py-3 bg-[#58CC02] text-white rounded-xl shadow-md hover:bg-[#46A302] transition-all duration-200 font-bold border-b-4 border-[#46A302]"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       title="Download Drawing"
+                      style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
                     >
                       <Download className="w-5 h-5" />
                       <span>Save</span>
@@ -608,10 +599,11 @@ export default function LearnPage() {
 
                     <motion.button
                       onClick={handleShare}
-                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                      className="flex items-center gap-2 px-4 py-3 bg-[#1CB0F6] text-white rounded-xl shadow-md hover:bg-[#1BA0E1] transition-all duration-200 font-bold border-b-4 border-[#1BA0E1]"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       title="Share Drawing"
+                      style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
                     >
                       <Share2 className="w-5 h-5" />
                       <span>Share</span>
@@ -622,7 +614,7 @@ export default function LearnPage() {
 
               {drawingSteps.length > 0 && (
                 <>
-                  <div className="bg-white p-6 rounded-2xl shadow-lg border-2 border-purple-100 step-gallery-section">
+                  <div className="bg-white p-2 rounded-2xl shadow-lg border-6 border-[#FFD900] step-gallery-section">
                     <StepGallery
                       steps={drawingSteps}
                       currentStep={currentStep}
@@ -630,7 +622,7 @@ export default function LearnPage() {
                     />
                   </div>
 
-                  <div className="bg-white p-6 rounded-2xl shadow-lg border-2 border-purple-100">
+                  <div className="bg-white p-1 rounded-2xl shadow-lg border-6 border-[#FFD900]">
                     <DrawingCanvas
                       currentImage={drawingSteps[currentStep]?.image || ''}
                       currentInstruction={drawingSteps[currentStep]?.instruction || ''}
@@ -647,4 +639,4 @@ export default function LearnPage() {
       </motion.div>
     </div>
   );
-} 
+}
