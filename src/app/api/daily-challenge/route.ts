@@ -107,16 +107,16 @@ A bunny wearing sneakers, hopping through a field of giant, floating bubbles.
 
 The style should be whimsical and simple, allowing children to connect with the image and create their own playful captions. 
 
-Generate the image with the  ( 788 * 296 ) 16:9 aspect ratio to maintain quality.`
+Generate the only the image with the  ( 788 * 296 ) 16:9 aspect ratio to maintain quality. Don't respond with anything else but the image.`
 
-    console.log('Calling Gemini API...')
+    console.log('[Daily Challenge] Calling Gemini API...')
     const response = await model.generateContent(prompt)
-    console.log('Gemini API response received')
+    console.log('[Daily Challenge] Gemini API response received')
     let imageData = null
 
     if (response.response.candidates && response.response.candidates[0].content.parts && response.response.candidates[0].content.parts[0].inlineData) {
       imageData = response.response.candidates[0].content.parts[0].inlineData.data
-      console.log('Daily contest image generated (size) :  ', imageData.length)
+      console.log('[Daily Challenge] Daily contest image generated (size) :  ', imageData.length)
     }
 
     // Ensure directory exists

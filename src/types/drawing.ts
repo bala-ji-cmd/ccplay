@@ -41,10 +41,11 @@ export interface ModalState {
   errorMessage: string;
 }
 
-export interface DrawingEvent extends React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement> {
+export type DrawingEvent = (React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) & {
   nativeEvent: {
     offsetX?: number;
     offsetY?: number;
     touches?: TouchList;
+    changedTouches?: TouchList;
   };
 } 

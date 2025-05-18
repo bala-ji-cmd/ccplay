@@ -285,10 +285,10 @@ export default function StoryPage() {
 
                 <Button
                   onClick={() => handleCreateStory(false)}
-                  className="w-full bg-[#58CC02] hover:bg-[#46A302] text-white font-bold py-4 px-8 rounded-2xl text-lg border-b-4 border-[#46A302] hover:border-[#378700] transition-all flex items-center justify-center gap-2"
+                  className="w-auto min-w-[200px] bg-[#58CC02] hover:bg-[#46A302] text-white font-bold py-3 px-6 rounded-2xl text-base border-b-4 border-[#46A302] hover:border-[#378700] transition-all flex items-center justify-center gap-2 mx-auto"
                   disabled={isGenerating}
                 >
-                  <BookOpen className="w-6 h-6" />
+                  <BookOpen className="w-5 h-5" />
                   {isGenerating ? "Creating your story..." : "Generate your bedtime story with AI"}
                 </Button>
               </div>
@@ -345,8 +345,8 @@ export default function StoryPage() {
                       className="w-full h-32 object-cover"
                     />
                   ) : (
-                    <div className="w-full h-48 bg-gradient-to-br from-[#1CB0F6] to-[#8549BA] flex items-center justify-center">
-                      <img src="/placeholder.svg?height=96&width=96" alt="Story character" className="w-16 h-16" />
+                    <div className="w-full h-32 bg-gradient-to-br from-[#1CB0F6] to-[#8549BA] flex items-center justify-center">
+                      <img src="/placeholder.svg?height=96&width=96" alt="Story character" className="w-full h-full object-cover" />
                     </div>
                   )}
                   

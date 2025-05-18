@@ -14,14 +14,16 @@ export default function Home() {
     <>
       <Header />
       
-      <main >
+      <main>
         <div className="overflow-hidden">
-          <HeroSection />
+          <div>
+            <HeroSection />
+          </div>
           <BouncingWatermelonDivider/>
-          <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center">Loading solutions...</div>}>
+          {/* <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center">Loading solutions...</div>}>
             <PainPointSolution/>
-          </Suspense>
-          <BouncingWatermelonDivider/>
+          </Suspense> */}
+          {/* <BouncingWatermelonDivider/> */}
           <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center">Loading gallery...</div>}>
             <FeaturedDrawings/>
           </Suspense>
@@ -30,10 +32,10 @@ export default function Home() {
             <Testimonial/>
           </Suspense>
           <BouncingWatermelonDivider/>
-          <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center">Loading pricing...</div>}>
+          {/* <Suspense fallback={<div className="min-h-[400px] flex items-center justify-center">Loading pricing...</div>}>
             <Pricing/>
           </Suspense>
-          <BouncingWatermelonDivider/>
+          <BouncingWatermelonDivider/> */}
           <Suspense fallback={<div className="min-h-[300px] flex items-center justify-center">Loading FAQ...</div>}>
             <Faq/>
           </Suspense>

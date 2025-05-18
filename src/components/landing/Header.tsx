@@ -438,6 +438,7 @@ export function Header() {
           </button>
         </div>
       </div>
+      <div className="w-full border-b-4 border-dashed border-[#FFD900] mt-5"></div>
     </header>
   )
 }

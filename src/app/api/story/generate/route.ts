@@ -107,33 +107,25 @@ Before starting, randomly pick one genre from this list (without repeating the s
 Generate a colorful, cartoon-style banner image matching the story:  
 - **Style:** Soft-edged, bright pastel colors, cheerful mood  
 - **Characters:** Show the main character(s) mid-action or in an emotional moment  
-- **Setting:** Show the magical world/background reflecting the story’s tone  
-- **Feel:** It should look like a beautiful page out of a children’s picture book  
+- **Setting:** Show the magical world/background reflecting the story's tone  
+- **Feel:** It should look like a beautiful page out of a children's picture book  
 
-📦 Final Output Format (strict JSON)
-
-json
+📦 Final Output Format (strict JSON alone not anything else included in the response)
 {
   "genre": "Selected genre",
   "title": "A fun, catchy, and short title (max 10 words)",
   "story": "Under 500 words. Use short paragraphs.",
   "moral": "The life lesson taught.",
-  "banner_image_description": "A vivid 3–4 sentence description for the image generator."
-}
- 
-  `;
+  "banner_image_description": "A vivid 3-4 sentence description for the image generator."
+}  `;
 
-  const response = await model.generateContent(prompt);
   // console.log("[custom story] response", response);
-  let result = null;
-  // Process response parts
-  for (const part of response.response.candidates[0].content.parts) {
-    // Based on the part type, either get the text or image data
-    if (part.text) {
-      console.log("Received text response", part.text);
-      result = JSON.parse(part.text);
-    }
-  }
+  let response = await model.generateContent(prompt);
+  // console.log("[random story] response", response.response.text());
+  response = response.response.text().replace(/```json\s*|\s*```/g, '').trim()
+  // console.log("response after removing ```json and ```", response);
+  let result = JSON.parse(response);
+  // console.log("result", result);
   // console.log("result", result);
 
   return result;
@@ -167,7 +159,7 @@ Generate a colorful, cartoon-style banner image matching the story:
 - **Setting:** Show the magical world/background reflecting the story's tone  
 - **Feel:** It should look like a beautiful page out of a children's picture book  
 
-📦 Final Output Format (strict JSON)
+📦 Final Output Format (strict JSON alone not anything else included in the response)
 {
   "genre": "${selectedGenre}",
   "title": "A fun, catchy, and short title (max 10 words)",
@@ -176,18 +168,22 @@ Generate a colorful, cartoon-style banner image matching the story:
   "banner_image_description": "A vivid 3–4 sentence description for the image generator."
 }`;
 
-  const response = await model.generateContent(prompt);
-  // console.log("[random story] response", response);
+  let response = await model.generateContent(prompt);
+  // console.log("[random story] response", response.response.text());
+  response = response.response.text().replace(/```json\s*|\s*```/g, '').trim()
+  // console.log("response after removing ```json and ```", response);
+  let result = JSON.parse(response);
+  // console.log("result", result);
 
-  let result = null;
+  // let result = null;
   // Process response parts
-  for (const part of response.response.candidates[0].content.parts) {
-    // Based on the part type, either get the text or image data
-    if (part.text) {
-      console.log("Received text response");
-      result = JSON.parse(part.text);
-    }
-  }
+  // for (const part of response.response.candidates[0].content.parts) {
+  //   // Based on the part type, either get the text or image data
+  //   if (part.text) {
+  //     console.log("Received text response");
+  //     result = JSON.parse(part.text);
+  //   }
+  // }
   // console.log("result", result);
 
   return result;
@@ -213,17 +209,7 @@ export async function POST(req: Request) {
       model: "gemini-2.0-flash-exp-image-generation",
       generationConfig: {
         responseModalities: ['Text', 'Image']
-      },
-      safetySettings: [
-        {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
-        },
-        {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
-        }
-    ],
+      }
     });
 
     // Generate story based on type
@@ -233,13 +219,36 @@ export async function POST(req: Request) {
 
     // console.log("generatedStory", generatedStory);
 
-    const imagePrompt = generatedStory.banner_image_description + ". The image should be a beautiful page out of a children's picture book. Image size should be 1024x768";
+    const imagePrompt = 'Generate only image of a cheerful, soft-edged cartoon illustration for a children\'s book. ' + generatedStory.banner_image_description + ' Image size: 1024x768. Don\'t respond with anything else except the image.';
+    
+    console.log("imagePrompt", imagePrompt);
+    console.log("calling gemini api for banner image");
     const banner_image = await model.generateContent(imagePrompt);
 
+
+    // let result = null;
+    for (const part of banner_image.response.candidates[0].content.parts) {
+      // Based on the part type, either get the text or image data
+      if (part.inlineData) {
+        console.log("Received image response : ", part.inlineData.data.length);
+        
+      } 
+
+      if(part.text) {
+        console.log("Received text response : ", part.text);
+      }
+    }
+
+    // generatedStory.banner_image = result;
     
-    if (banner_image.response.candidates && banner_image.response.candidates[0].content.parts && banner_image.response.candidates[0].content.parts[0].inlineData) {
+    // console.log("result", result);
+    
+  if (banner_image.response.candidates && banner_image.response.candidates[0].content.parts && banner_image.response.candidates[0].content.parts[0].inlineData) {
       generatedStory.banner_image = banner_image.response.candidates[0].content.parts[0].inlineData.data;
       console.log("generated banner image size : ", generatedStory.banner_image.length);
+    } else {
+      console.log("no banner image generated");
+      generatedStory.banner_image = null;
     }
 
     try {

@@ -17,6 +17,7 @@ import { Loader } from "@/components/ui/loader";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { WarningModal } from "@/components/ui/WarningModal";
 import { Slider } from "@/components/ui/slider";
+import EditsCounter from "@/components/ui/edits-counter";
 
 const fireConfetti = () => {
   // First burst - center
@@ -157,7 +158,7 @@ export default function DrawPage() {
   const [isColorizingAnimation, setIsColorizingAnimation] = useState(false);
   const [playPop] = useSound('/sounds/pop.mp3', { volume: 0.5 });
   const [activeTool, setActiveTool] = useState<'pencil' | 'eraser'>('pencil');
-  const [pencilSize, setPencilSize] = useState<number>(2);
+  const [pencilSize, setPencilSize] = useState<number>(6);
   const [eraserSize, setEraserSize] = useState<number>(10);
   const [showStrokeOptions, setShowStrokeOptions] = useState<boolean>(false);
   const strokeSizes = [2, 4, 8] as const;
@@ -464,14 +465,26 @@ export default function DrawPage() {
       return;
     }
 
-    
-
     try {
       setIsLoading(true);
       const canvas = canvasRef.current;
       if (!canvas) return;
 
+      // If not colorized yet, colorize first and wait for it to complete
+      if (!hasColorized) {
+        await handleColorize();
+        // Wait a bit to ensure colorization is complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      // Force color mode before capturing image data
+      drawImageToCanvas(true);
+      
       const imageData = canvas.toDataURL('image/png');
+     
+      console.log('imageData', imageData);
+      console.log('hasColorized', hasColorized);
+      console.log('isColorMode', isColorMode);
 
       // Save drawing
       const { data: drawingData, error: drawingError } = await supabase
@@ -479,18 +492,16 @@ export default function DrawPage() {
         .insert([{
           user_id: user.id,
           image_data: imageData,
-          drawing_name: drawingName
+          drawing_name: drawingName,
         }])
         .select('id')
         .single();
-
-
 
       if (drawingError) throw drawingError;
       console.log('saved drawing');
 
       if(!isSaved){
-            // Check subscription status and use credits
+        // Check subscription status and use credits
         if (!(await useCredits(25, 'draw'))) {
           setShowSubscriptionModal(true);
           return;
@@ -498,10 +509,8 @@ export default function DrawPage() {
           console.log('used credits');
         }
       }
-      
 
       setIsSaved(true)
-
       fireConfetti();
 
       return drawingData;
@@ -601,7 +610,7 @@ export default function DrawPage() {
 
       const drawingData = tempCanvas.toDataURL("image/png").split(",")[1];
 
-      const enhancedPrompt = `${prompt}. Create a black and white line drawing with pure black lines on white background, sized for a 960x540 canvas (16:9 aspect ratio). Use simple, clean strokes without any shading or grayscale.`;
+      const enhancedPrompt = `${prompt}. Create a black and white line drawing with pure black lines on white background, sized for a 1280 x 720 canvas (16:9 aspect ratio). Use simple, clean strokes without any shading or grayscale.`;
 
       const requestPayload = {
         prompt: enhancedPrompt,
@@ -639,9 +648,9 @@ export default function DrawPage() {
 
         // Wait for the image to load before saving state
         const img = new Image();
-        img.onload = () => {
+        img.onload = async () => {
           backgroundImageRef.current = img;
-          drawImageToCanvas();
+          drawImageToCanvas(true); // Force color display
           saveCanvasState(prompt, 'generated'); // Save state after drawing
         };
         img.src = newImage;
@@ -679,20 +688,32 @@ export default function DrawPage() {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
+      let savedData;
       if (!isSaved) {
-        const savedData = await handleSave(); // Ensure saveCanvasState returns the saved data
+        savedData = await handleSave(); // Ensure saveCanvasState returns the saved data
         if (!savedData) {
           throw new Error("Failed to save to database");
         }
+      } else {
+        // If already saved, fetch the latest drawing
+        const { data, error } = await supabase
+          .from('user_images')
+          .select('id')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (error) throw error;
+        savedData = data;
       }
 
-
-      // Set the shareId for the modal
-
+      // Set the shareId from the saved drawing data
+      setShareId(savedData.id);
       setShowShareModal(true);
 
       // Copy to clipboard
-      const shareUrl = `${window.location.origin}/share/draw/${shareId}`;
+      const shareUrl = `${window.location.origin}/share/draw/${savedData.id}`;
       await navigator.clipboard.writeText(shareUrl);
 
     } catch (error) {
@@ -739,20 +760,26 @@ export default function DrawPage() {
         const newImage = `data:image/png;base64,${data.imageData}`;
         setIsColorMode(true);
 
-        // Load the image and save state
-        const img = new Image();
-        img.onload = () => {
-          backgroundImageRef.current = img;
-          drawImageToCanvas(true); // Force color display
-          saveCanvasState('colorized', 'colorized');
-          setGeneratedImage(newImage);
-          setHasColorized(true);
-          handleSave();
-          console.log('colorized, proceeding to save');
-          fireConfetti();
-        };
-        img.src = newImage;
-        setIsInFinalState(true);
+        // Create a promise to handle the image loading and state updates
+        await new Promise((resolve) => {
+          const img = new Image();
+          img.onload = async () => {
+            backgroundImageRef.current = img;
+            drawImageToCanvas(true); // Force color display
+            setGeneratedImage(newImage); // Update state before saving
+            setHasColorized(true);
+            setIsColorMode(true);
+            setIsInFinalState(true);
+            saveCanvasState('colorized', 'colorized');
+            fireConfetti();
+            resolve(true);
+          };
+          img.src = newImage;
+        });
+
+        // Now that all state updates are complete, save the drawing
+        // await handleSave();
+        console.log('colorized, proceeding to save');
       } else {
         console.error("Failed to colorize image:", data.error);
         setErrorMessage(data.error);
@@ -893,64 +920,69 @@ export default function DrawPage() {
 
   );
 
-  const DownloadModal = () => (
+  const DownloadModal = () => {
+    const [localFileName, setLocalFileName] = useState(downloadFileName || drawingName);
 
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-    >
-      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border-8 border-[#FFD900]">
-        <div className="flex justify-between items-start mb-4">
-          <h3
-            className="text-xl font-bold text-[#4B4B4B]"
-            style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
-          >
-            Save your artwork
-          </h3>
-          <button
-            onClick={() => setShowDownloadModal(false)}
-            className="text-gray-400 hover:text-gray-500"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setDownloadFileName(localFileName);
+      setDrawingName(localFileName);
+      processDownload(e);
+    };
 
-        <form onSubmit={processDownload}>
-          <input
-            type="text"
-            value={downloadFileName || drawingName}
-            onChange={(e) => {
-              setDownloadFileName(e.target.value);
-              setDrawingName(e.target.value);
-            }}
-            placeholder={drawingName}
-            className="w-full px-4 py-2 border-4 border-[#E5E5E5] rounded-xl mb-4 focus:outline-none focus:border-[#1CB0F6]"
-            style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
-            autoFocus
-          />
-          <div className="flex justify-end gap-2">
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      >
+        <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border-8 border-[#FFD900]">
+          <div className="flex justify-between items-start mb-4">
+            <h3
+              className="text-xl font-bold text-[#4B4B4B]"
+              style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+            >
+              Save your artwork
+            </h3>
             <button
-              type="button"
               onClick={() => setShowDownloadModal(false)}
-              className="px-4 py-2 text-sm border-2 border-[#E5E5E5] rounded-xl hover:bg-[#F7F7F7] font-bold"
+              className="text-gray-400 hover:text-gray-500"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              
-              className="px-4 py-2 text-sm bg-[#58CC02] text-white rounded-xl hover:bg-[#46A302] font-bold border-b-2 border-[#46A302]"
-            >
-              Save
+              <X className="w-5 h-5" />
             </button>
           </div>
-        </form>
-      </div>
-    </motion.div>
 
-  );
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              value={localFileName}
+              onChange={(e) => setLocalFileName(e.target.value)}
+              placeholder={drawingName}
+              className="w-full px-4 py-2 border-4 border-[#E5E5E5] rounded-xl mb-4 focus:outline-none focus:border-[#1CB0F6]"
+              style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowDownloadModal(false)}
+                className="px-4 py-2 text-sm border-2 border-[#E5E5E5] rounded-xl hover:bg-[#F7F7F7] font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 text-sm bg-[#58CC02] text-white rounded-xl hover:bg-[#46A302] font-bold border-b-2 border-[#46A302]"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </motion.div>
+    );
+  };
 
   const NewDrawingModal = () => (
 
@@ -1074,6 +1106,7 @@ export default function DrawPage() {
             <img
               src={version.image || "/placeholder.svg"}
               alt={`Version ${index + 1}`}
+              style={{ filter: 'none' }}
               className="w-full h-32 object-contain mb-2"
             />
 
@@ -1095,6 +1128,41 @@ export default function DrawPage() {
 
   return (
     <div className="min-h-screen notebook-paper-bg">
+      <style jsx>{`
+        .button-press {
+          position: relative;
+          transition: transform 0.1s ease, box-shadow 0.1s ease;
+          transform-style: preserve-3d;
+          transform: translateZ(0);
+        }
+
+        .button-press:active {
+          transform: translateY(4px) scale(0.98);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .button-press:active::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.05);
+          border-radius: inherit;
+        }
+
+        .button-press:disabled {
+          transform: none;
+          box-shadow: none;
+        }
+
+        .button-press:disabled:active {
+          transform: none;
+          box-shadow: none;
+        }
+      `}</style>
+
       {showSubscriptionModal && <SubscriptionModal message="You've used your free drawing! Subscribe now to unlock unlimited magical creations." />}
 
       {showWarningModal && (
@@ -1108,18 +1176,41 @@ export default function DrawPage() {
         <div className="w-full">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-4">
-              <h1
-                className="text-2xl sm:text-3xl font-bold text-[#4B4B4B]"
-                style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
-              >
-                Magic Drawing Pad
-              </h1>
-
+              {isEditingName ? (
+                <motion.input
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  type="text"
+                  value={drawingName}
+                  onChange={(e) => setDrawingName(e.target.value)}
+                  onBlur={() => setIsEditingName(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setIsEditingName(false)
+                    }
+                  }}
+                  className="px-3 py-1 border-4 border-[#FFD900] rounded-xl focus:outline-none focus:border-[#FFC800] text-2xl sm:text-3xl font-bold bg-white text-[#8549BA]"
+                  style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+                  autoFocus
+                />
+              ) : (
+                <motion.div
+                  className="flex items-center gap-2 cursor-pointer group"
+                  onClick={() => setIsEditingName(true)}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <h1
+                    className="text-2xl sm:text-3xl font-bold text-[#8549BA] group-hover:text-[#7038A8]"
+                    style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+                  >
+                    {drawingName}
+                  </h1>
+                  <Pencil className="w-4 h-4 text-[#8549BA] opacity-0 group-hover:opacity-100 transition-opacity" />
+                </motion.div>
+              )}
               <motion.button
                 onClick={handleStartNewDrawing}
                 className="bg-[#8549BA] text-white hover:bg-[#7038A8] rounded-full p-2 shadow-md"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
                 data-tooltip-id="new-drawing-tooltip"
                 data-tooltip-content="Start a new drawing"
               >
@@ -1141,50 +1232,12 @@ export default function DrawPage() {
               </motion.button>
             </div>
 
-            <div className="flex items-center gap-4">
-              {isEditingName ? (
-                <motion.input
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  type="text"
-                  value={drawingName}
-                  onChange={(e) => setDrawingName(e.target.value)}
-                  onBlur={() => setIsEditingName(false)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      setIsEditingName(false)
-                    }
-                  }}
-                  className="px-3 py-1 border-4 border-[#FFD900] rounded-xl focus:outline-none focus:border-[#FFC800] text-lg font-semibold bg-white"
-                  style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
-                  autoFocus
-                />
-              ) : (
-                <motion.div
-                  className="flex items-center gap-2 cursor-pointer group"
-                  onClick={() => setIsEditingName(true)}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <h2
-                    className="text-lg font-semibold text-[#8549BA] group-hover:text-[#7038A8]"
-                    style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
-                  >
-                    {drawingName}
-                  </h2>
-                  <Pencil className="w-4 h-4 text-[#8549BA] opacity-0 group-hover:opacity-100 transition-opacity" />
-                </motion.div>
-              )}
-              {!isEditingName && (
-                <span
-                  className="text-sm font-bold bg-[#FFC800] text-[#78510D] px-3 py-1 rounded-full border-2 border-[#FFD900]"
-                  style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
-                >
-                  {maxEdits - editCount} edits remaining
-                </span>
-              )}
-            </div>
-
             <menu className="flex items-center gap-2 relative">
+              {!isInFinalState && !hasColorized && !isEditsMaxedOut() && (
+                <div className="mr-4">
+                  <EditsCounter count={maxEdits - editCount} />
+                </div>
+              )}
               <div className="relative">
                 <button
                   type="button"
@@ -1401,6 +1454,7 @@ export default function DrawPage() {
                     <img
                       src={template.src || "/placeholder.svg"}
                       alt={template.name}
+                      style={{ filter: 'none' }}
                       className="w-full h-32 object-contain mb-2"
                     />
                     <span
@@ -1420,8 +1474,8 @@ export default function DrawPage() {
               <div className={`${canvasWrapperClass} mb-4`}>
                 <canvas
                   ref={canvasRef}
-                  width={960}
-                  height={540}
+                  width={1280}
+                  height={720}
                   onMouseDown={startDrawing}
                   onMouseMove={draw}
                   onMouseUp={stopDrawing}

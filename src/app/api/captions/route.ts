@@ -76,16 +76,16 @@ export async function GET(request: Request) {
       )
     }
 
-    // Check if results are computed for the given date
-    if (!isResultsComputed(date)) {
-      console.log(`Results not computed for date ${date}, computing now...`)
-      try {
-        await computeScores(date)
-      } catch (error) {
-        console.error('Failed to compute scores:', error)
-        // Continue with existing scores even if computation fails
-      }
-    }
+    // // Check if results are computed for the given date
+    // if (!isResultsComputed(date)) {
+    //   console.log(`Results not computed for date ${date}, computing now...`)
+    //   try {
+    //     await computeScores(date)
+    //   } catch (error) {
+    //     console.error('Failed to compute scores:', error)
+    //     // Continue with existing scores even if computation fails
+    //   }
+    // }
 
     try {
       const captions = getTopCaptions(date, limit)

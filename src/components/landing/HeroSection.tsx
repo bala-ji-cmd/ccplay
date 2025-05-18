@@ -38,12 +38,12 @@ export function HeroSection() {
   }
 
   return (
-    <section className="bg-[#FFF4E5] py-6" style={{ fontFamily: "'Comic Sans MS', 'Bubblegum Sans', cursive" }}>
+    <section className="bg-[#FFF4E5] pt-16 pb-16 flex items-center" style={{ fontFamily: "'Comic Sans MS', 'Bubblegum Sans', cursive" } }>
       <div className="container mx-auto px-4">
         <div className="relative rounded-3xl p-6 md:p-8 overflow-hidden border-[8px] border-[#58CC02]">
           {/* Floating bubbles animation */}
-          <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-            {[...Array(8)].map((_, i) => (
+          {/* <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+            {[...Array(10)].map((_, i) => (
               <div
                 key={i}
                 className="absolute rounded-full opacity-30"
@@ -58,15 +58,11 @@ export function HeroSection() {
                 }}
               ></div>
             ))}
-          </div>
+          </div> */}
 
           <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
             <div className="flex-1 space-y-5 text-center md:text-left">
-              {/* Sun decoration */}
-              <div className="hidden md:block absolute top-0 left-0 transform -translate-x-1/4 -translate-y-1/4">
-                <div className="w-32 h-32 bg-[#FFC800] rounded-full opacity-60"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-5xl">☀️</div>
-              </div>
+
 
               <div>
                 <h1 className="text-4xl md:text-6xl font-black leading-tight text-center">
@@ -171,8 +167,8 @@ export function HeroSection() {
                   <Image
                     src="/hero-image-new.png"
                     alt="Kids drawing with JJ and Cocomelon friends"
-                    width={600}
-                    height={500}
+                    width={500}
+                    height={400}
                     className="rounded-2xl"
                   />
 
@@ -180,13 +176,13 @@ export function HeroSection() {
                   <div
                     className={`absolute bottom-4 left-4 transition-transform duration-300 ${bounce ? "transform translate-y-1" : ""}`}
                   >
-                    <Image src="/jj-happy.png" alt="JJ" width={80} height={80} className="filter drop-shadow-lg" />
+                    <Image src="/jj-happy.png" alt="JJ" width={60} height={60} className="filter drop-shadow-lg" />
                   </div>
 
                   <div
                     className={`absolute bottom-4 right-4 transition-transform duration-300 ${bounce ? "transform translate-y-1" : ""}`}
                   >
-                    <Image src="/yoyo-happy.png" alt="YoYo" width={70} height={70} className="filter drop-shadow-lg" />
+                    <Image src="/yoyo-happy.png" alt="YoYo" width={50} height={50} className="filter drop-shadow-lg" />
                   </div>
 
                   <div
@@ -195,8 +191,8 @@ export function HeroSection() {
                     <Image
                       src="/tomtom-happy.png"
                       alt="TomTom"
-                      width={60}
-                      height={60}
+                      width={45}
+                      height={45}
                       className="filter drop-shadow-lg"
                     />
                   </div>
@@ -215,52 +211,7 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Interactive Character Showcase */}
-          <div className="mt-8 relative z-10">
-            <div className="bg-white rounded-xl p-2 border-4 border-[#FFC800] shadow-lg">
-              <h3 className="text-xl font-bold text-center mb-4 text-[#1CB0F6]">Start your creativity journey and earn badges! 🎨</h3>
-              
-              {/* <div className="grid grid-cols-3 gap-3"> */}
-                {/* Character Cards */}
-                {/* <div className="bg-[#FFF4E5] rounded-xl p-3 text-center transform hover:scale-105 transition-transform cursor-pointer">
-                  <div className="w-10 h-10 mx-auto mb-2">
-                    <Image src="/jj-happy.png" alt="JJ" width={64} height={64} className="animate-bounce" />
-                  </div>
-                  <p className="text-sm font-bold text-[#78510D]">JJ</p>
-                  <div className="text-yellow-500 text-xs">⭐ New Friend!</div>
-                </div> */}
-
-                {/* <div className="bg-[#FFF4E5] rounded-xl p-3 text-center transform hover:scale-105 transition-transform cursor-pointer">
-                  <div className="w-10 h-10 mx-auto mb-2">
-                    <Image src="/yoyo-happy.png" alt="YoYo" width={64} height={64} className="animate-bounce" />
-                  </div>
-                  <p className="text-sm font-bold text-[#78510D]">YoYo</p>
-                  <div className="text-yellow-500 text-xs">⭐ New Friend!</div>
-                </div> */}
-
-                {/* <div className="bg-[#FFF4E5] rounded-xl p-3 text-center transform hover:scale-105 transition-transform cursor-pointer">
-                  <div className="w-10 h-10 mx-auto mb-2">
-                    <Image src="/tomtom-happy.png" alt="TomTom" width={64} height={64} className="animate-bounce" />
-                  </div>
-                  <p className="text-sm font-bold text-[#78510D]">TomTom</p>
-                  <div className="text-yellow-500 text-xs">⭐ New Friend!</div>
-                </div> */}
-              {/* </div> */}
-
-              {/* Achievement Badges */}
-              <div className="mt-4 flex justify-center gap-2">
-                <div className="bg-[#58CC02] text-white rounded-full px-3 py-1 text-xl font-bold flex items-center gap-1">
-                  🎨 First Drawing
-                </div>
-                <div className="bg-[#1CB0F6] text-white rounded-full px-3 py-1 text-xl font-bold flex items-center gap-1">
-                  🌟 Star Artist
-                </div>
-                <div className="bg-[#FF4B4B] text-white rounded-full px-3 py-1 text-xl font-bold flex items-center gap-1">
-                  🏆 Super Creator
-                </div>
-              </div>
-            </div>
-          </div>
+         
         </div>
       </div>
 

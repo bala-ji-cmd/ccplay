@@ -80,18 +80,18 @@ export async function POST(request: Request) {
       if (prompt.includes("[COLORIZE]")) {
         generationContent = [
           imagePart,
-          { text: `Apply bright and solid colors to this 960x540 line drawing, filling it in like a children's coloring book. Use vibrant, cheerful colors suitable for children's illustrations. Each distinct element should have its own clear color. Avoid grayscale, maintaining the original black line work while adding solid, clean colors between the lines.` }
+          { text: `Apply bright and solid colors to this 1280 x 720 line drawing, filling it in like a children's coloring book. Use vibrant, cheerful colors suitable for children's illustrations. Each distinct element should have its own clear color. Avoid grayscale, maintaining the original black line work while adding solid, clean colors between the lines.` }
         ];
       } else {
         // Regular black and white sketch generation
         generationContent = [
           imagePart,
-          { text: `${prompt}. Keep a 960x540 canvas (16:9 aspect ratio) with a minimal line doodle style. Ensure clean, bold strokes with sharp edges, avoiding any blurring or feathering. The lines should be well-defined and suitable for a children's drawing.` }
+          { text: `${prompt}. Keep a 1280 x 720 canvas (16:9 aspect ratio) with a minimal line doodle style. Ensure clean, bold strokes with sharp edges, avoiding any blurring or feathering. The lines should be well-defined and suitable for a children's drawing.` }
         ];
       }
     } else {
       // Initial sketch creation
-      generationContent = `${prompt}. Create a black and white hand-drawn sketch on a 960x540 canvas (16:9 aspect ratio). Use thick, bold strokes similar to a heavy marker or ink pen. Ensure the lines are sharp, solid, and well-defined with no blurring, feathering, or shading—just clean black outlines on a white background`;
+      generationContent = `${prompt}. Create a black and white hand-drawn sketch on a 1280 x 720 canvas (16:9 aspect ratio). Use thick, bold strokes similar to a heavy marker or ink pen. Ensure the lines are sharp, solid, and well-defined with no blurring, feathering, or shading—just clean black outlines on a white background`;
     }
 
     console.log("Calling Gemini API...");
@@ -103,11 +103,11 @@ export async function POST(request: Request) {
     const result = {
       success: true,
       message: '',
-      imageData: null
+      imageData: null as string | null
     };
 
     // Process response parts
-    for (const part of response.response.candidates[0].content.parts) {
+    for (const part of response.response.candidates?.[0]?.content?.parts || []) {
       // Based on the part type, either get the text or image data
       if (part.text) {
         result.message = part.text;

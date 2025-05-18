@@ -380,3 +380,86 @@
   color: theme('colors.red.500');
   animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Button press animation styles */
+.button-press {
+  position: relative;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+}
+
+.button-press:active {
+  transform: translateY(4px) scale(0.98);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.button-press:active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: inherit;
+}
+
+.button-press:disabled {
+  transform: none;
+  box-shadow: none;
+}
+
+.button-press:disabled:active {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Add button press effect to all buttons by default */
+button {
+  @apply button-press;
+}
+
+/* Add button press effect to elements that look like buttons */
+[role="button"],
+.button-like {
+  @apply button-press;
+}
+
+@keyframes sparkle {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(180deg);
+    opacity: 0;
+  }
+}
+
+.star-sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #FFD900;
+  border-radius: 50%;
+  animation: sparkle 0.6s ease-out forwards;
+}
+
+.star-sparkle:nth-child(1) {
+  top: 20%;
+  left: 20%;
+}
+
+.star-sparkle:nth-child(2) {
+  top: 60%;
+  left: 50%;
+}
+
+.star-sparkle:nth-child(3) {
+  top: 30%;
+  left: 80%;
+}

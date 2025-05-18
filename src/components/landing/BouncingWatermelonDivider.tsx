@@ -1,11 +1,11 @@
 export function BouncingWatermelonDivider() {
   return (
-    <div className="relative h-24 overflow-hidden bg-[#FFF4E5] my-8 border-y-4 border-[#58CC02]">
+    <div className="relative h-16 overflow-hidden bg-[#FFF4E5] my-8 border-y-4 border-[#58CC02]">
       <div className="absolute inset-0 flex justify-around items-center">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
           <div
             key={i}
-            className="relative w-16 h-16 rounded-full animate-bounce"
+            className="relative w-8 h-8 rounded-full animate-bounce"
             style={{
               animationDelay: `${i * 0.1}s`,
               backgroundColor: "#FF4B4B",
@@ -13,12 +13,12 @@ export function BouncingWatermelonDivider() {
             }}
           >
             {/* Watermelon seeds */}
-            <div className="absolute top-1/4 left-1/4 w-2 h-3 bg-[#78510D] rounded-full transform rotate-45"></div>
-            <div className="absolute top-2/4 left-1/2 w-2 h-3 bg-[#78510D] rounded-full transform rotate-12"></div>
-            <div className="absolute top-1/2 left-1/4 w-2 h-3 bg-[#78510D] rounded-full transform -rotate-20"></div>
+            <div className="absolute top-1/4 left-1/4 w-1 h-2 bg-[#78510D] rounded-full transform rotate-45"></div>
+            <div className="absolute top-2/4 left-1/2 w-1 h-2 bg-[#78510D] rounded-full transform rotate-12"></div>
+            <div className="absolute top-1/2 left-1/4 w-1 h-2 bg-[#78510D] rounded-full transform -rotate-20"></div>
 
             {/* Watermelon stem */}
-            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-5 bg-[#58CC02] rounded-t-full"></div>
+            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-3 bg-[#58CC02] rounded-t-full"></div>
 
             {/* Watermelon face (on some) */}
             {/* {i % 3 === 0 && (

@@ -323,7 +323,6 @@ export default function ProfilePage() {
                             <Progress
                               value={Math.min(userDrawings.length * 10, 100)}
                               className="h-3 bg-[#E5E5E5]"
-                              indicatorClassName="bg-[#58CC02]"
                             />
                           </div>
                           <div className="space-y-2">
@@ -344,7 +343,6 @@ export default function ProfilePage() {
                             <Progress
                               value={Math.min(userLearnings.length * 20, 100)}
                               className="h-3 bg-[#E5E5E5]"
-                              indicatorClassName="bg-[#FF9600]"
                             />
                           </div>
                           <div className="space-y-2">
@@ -363,7 +361,7 @@ export default function ProfilePage() {
                                 credits
                               </span>
                             </div>
-                            <Progress value={70} className="h-3 bg-[#E5E5E5]" indicatorClassName="bg-[#1CB0F6]" />
+                            <Progress value={70} className="h-3 bg-[#E5E5E5]" />
                           </div>
                         </>
                       )}
@@ -674,7 +672,6 @@ export default function ProfilePage() {
                                 )
                           }
                           className="h-3 bg-[#E5E5E5]"
-                          indicatorClassName="bg-[#FF9600]"
                         />
                       </div>
                       <div className="p-4 bg-[#FFF9E5] rounded-xl border-2 border-[#FFD900]">
@@ -692,7 +689,6 @@ export default function ProfilePage() {
                         <Progress
                           value={isLoading ? 0 : (userLearnings.length / 5) * 100}
                           className="h-3 bg-[#E5E5E5]"
-                          indicatorClassName="bg-[#58CC02]"
                         />
                       </div>
                     </div>

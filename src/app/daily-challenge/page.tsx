@@ -17,7 +17,7 @@ interface Caption {
   rank?: number;
 }
 
-export function CaptionItChallenge() {
+function CaptionItChallenge() {
   const {session } = useAuth()
   const [caption, setCaption] = useState("")
   const [submitted, setSubmitted] = useState(false)
@@ -64,10 +64,14 @@ export function CaptionItChallenge() {
 
   // Fetch daily challenge
   useEffect(() => {
+    if (dailyChallenge) return; // Skip if we already have the data
+
     const fetchDailyChallenge = async () => {
       try {
         const response = await fetch('/api/daily-challenge')
         const data = await response.json()
+        console.log('daily challenge data: ',data);
+        
         setDailyChallenge(data)
         
         // Calculate time remaining
@@ -86,10 +90,12 @@ export function CaptionItChallenge() {
     }
 
     fetchDailyChallenge()
-  }, [])
+  }, [dailyChallenge])
 
   // Fetch yesterday's challenge
   useEffect(() => {
+    if (yesterdayChallenge) return; // Skip if we already have the data
+
     const fetchYesterdayChallenge = async () => {
       try {
         const yesterday = new Date()
@@ -105,7 +111,7 @@ export function CaptionItChallenge() {
     }
 
     fetchYesterdayChallenge()
-  }, [])
+  }, [yesterdayChallenge])
 
   // Update time remaining
   useEffect(() => {
@@ -129,6 +135,8 @@ export function CaptionItChallenge() {
 
   // Fetch previous day's captions
   useEffect(() => {
+    if (previousCaptions.length > 0) return; // Skip if we already have the data
+
     const fetchPreviousCaptions = async () => {
       try {
         const yesterday = new Date()
@@ -146,7 +154,7 @@ export function CaptionItChallenge() {
     }
 
     fetchPreviousCaptions()
-  }, [])
+  }, [previousCaptions.length])
 
 
 
@@ -378,10 +386,6 @@ export function CaptionItChallenge() {
   )
 }
 
-export default function DailyChallengeScreen() {
-  return (
-    <div className="min-h-screen w-full bg-[#FFF4E5]">
-      <CaptionItChallenge />
-    </div>
-  )
+export default function Page() {
+  return <CaptionItChallenge />
 }

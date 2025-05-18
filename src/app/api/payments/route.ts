@@ -7,8 +7,8 @@ import { supabase } from '@/lib/supabase';
 
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16'
-});
+  apiVersion: '2025-02-24.acacia'
+}); 
 
 const PLANS = {
   'jj-fun-pack': {

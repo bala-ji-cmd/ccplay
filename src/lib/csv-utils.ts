@@ -110,9 +110,7 @@ export function getTopCaptions(date: string, limit: number = 20): CaptionRecord[
   return captions
     .filter(caption => caption.challenge_date === date)
     .sort((a, b) => {
-      // First sort by score (descending)
-      const scoreDiff = b.score - a.score
-      if (scoreDiff !== 0) return scoreDiff
+      
       // Then sort by submission time (ascending)
       return new Date(a.submission_time).getTime() - new Date(b.submission_time).getTime()
     })
