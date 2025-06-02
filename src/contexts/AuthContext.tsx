@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('AuthContext: Attempting sign in')
+      //console.log('AuthContext: Attempting sign in')
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(data.session.user)
       }
 
-      console.log('AuthContext: Sign in successful:', data)
+      //console.log('AuthContext: Sign in successful:', data)
       return { data, error: null }
     } catch (error) {
       console.error('AuthContext: Sign in catch block:', error)

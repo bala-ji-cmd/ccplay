@@ -46,10 +46,14 @@ export async function POST(request: Request) {
             );
         }
 
-        console.log("API key obtained, initializing Gemini API...");
+        //console.log("API key obtained, initializing LLM API...");
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({
             model: "gemini-2.0-flash-exp-image-generation",
+            // @ts-ignore - responseModalities is required for image generation but not in type definition
+            generationConfig: {
+                responseModalities: ['Text', 'Image']
+            } as any,
             safetySettings: [
             {
                 category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
@@ -60,10 +64,6 @@ export async function POST(request: Request) {
                 threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
             }
         ],
-
-            generationConfig: {
-                responseModalities: ['Text', 'Image']
-            },
         });
 
 
@@ -145,15 +145,16 @@ By ensuring **bold strokes, high resolution, and structured simplicity**, kids w
 
 
 
-        console.log("Calling Gemini API...");
+        console.log("Calling LLM API...");
         // console.log('generationContent', generationContent);
 
         const response = await model.generateContent(learningSeriesMasterPrompt, {
+            // @ts-ignore - generationConfig is required for image generation but not in type definition
             generationConfig: {
                 maxOutputTokens: 5000, // Set the max token size here
-            }
+            } as any,
         });
-        console.log("Gemini API response received");
+        console.log("LLM API response received");
 
         if (!response.response?.candidates?.[0]?.content?.parts) {
             return NextResponse.json(

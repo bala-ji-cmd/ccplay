@@ -27,7 +27,7 @@ export function LoginForm() {
     setLoading(true)
 
     try {
-      console.log('Attempting sign in with:', { email: formData.email })
+      //console.log('Attempting sign in with:', { email: formData.email })
       
       const { data, error: signInError } = await signIn(formData.email, formData.password)
       
@@ -37,7 +37,7 @@ export function LoginForm() {
       }
 
       if (data?.session) {
-        console.log('Sign in successful, redirecting to:', redirectTo)
+        //console.log('Sign in successful, redirecting to:', redirectTo)
         await new Promise(resolve => setTimeout(resolve, 500))
         router.replace(redirectTo)
       } else {
@@ -82,7 +82,7 @@ export function LoginForm() {
 
   useEffect(() => {
     if (user && !loading) {
-      console.log('User already logged in, redirecting to:', redirectTo)
+      //console.log('User already logged in, redirecting to:', redirectTo)
       router.replace(redirectTo)
     }
   }, [user, loading, redirectTo, router])

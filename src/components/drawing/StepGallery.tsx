@@ -15,7 +15,7 @@ export function StepGallery({ steps, currentStep, setCurrentStep }: StepGalleryP
   if (!steps?.length) {
     return null;
   }
-  console.log(steps);
+  //console.log(steps);
   return (
     <div className="w-full">
       

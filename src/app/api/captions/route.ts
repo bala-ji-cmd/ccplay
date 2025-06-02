@@ -16,10 +16,10 @@ async function computeScores(date: string) {
     }
 
     const data = await response.json()
-    console.log('Score computation result:', data)
+    // console.log('Score computation result:', data)
     return data
   } catch (error) {
-    console.error('Error computing scores:', error)
+    // console.error('Error computing scores:', error)
     throw error
   }
 }
@@ -27,7 +27,7 @@ async function computeScores(date: string) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    console.log("Received request body:", body)
+    //console.log("Received request body:", body)
     
     const { user_id, challenge_date, caption } = body
 
@@ -89,7 +89,7 @@ export async function GET(request: Request) {
 
     try {
       const captions = getTopCaptions(date, limit)
-      console.log(`Fetched ${captions.length} captions for date ${date}`)
+      //console.log(`Fetched ${captions.length} captions for date ${date}`)
       return NextResponse.json(captions)
     } catch (error) {
       console.error("Error in getTopCaptions:", error)

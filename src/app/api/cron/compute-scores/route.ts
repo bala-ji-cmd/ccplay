@@ -162,14 +162,14 @@ Requirements:
       { text: prompt }
     ]
 
-    console.log("Calling Gemini API...")
+    // console.log("Calling Gemini API...")
     
     // Get scores from Gemini
     const result = await model.generateContent(generationContent)
-    console.log("Response received from Gemini...")
+    // console.log("Response received from Gemini...")
 
     let response = result.response.text()
-    console.log("Raw response:", response)
+    // console.log("Raw response:", response)
 
     // Clean up the response to handle potential markdown or code blocks
     response = response.replace(/```json\s*|\s*```/g, '').trim()
@@ -206,7 +206,7 @@ Requirements:
         throw new Error(`Missing scores for captions: ${missingCaptions.join(', ')}`)
       }
 
-      console.log("Validated scores:", scores)
+      // console.log("Validated scores:", scores)
 
       // Update scores in CSV
       updateCaptionScores(targetDate, scores)

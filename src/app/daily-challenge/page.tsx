@@ -70,7 +70,7 @@ function CaptionItChallenge() {
       try {
         const response = await fetch('/api/daily-challenge')
         const data = await response.json()
-        console.log('daily challenge data: ',data);
+        //('daily challenge data: ',data);
         
         setDailyChallenge(data)
         
@@ -142,14 +142,14 @@ function CaptionItChallenge() {
         const yesterday = new Date()
         yesterday.setDate(yesterday.getDate() - 1)
         const yesterdayStr = yesterday.toISOString().split('T')[0]
-        console.log('prefetching results for date : ',yesterdayStr);
+        //console.log('prefetching results for date : ',yesterdayStr);
         
         const response = await fetch(`/api/captions?date=${yesterdayStr}&limit=20`)
         const data = await response.json()
         setPreviousCaptions(data) 
         setAllCaptions(data)
       } catch (error) {
-        console.error('Error fetching previous captions:', error)
+        //console.error('Error fetching previous captions:', error)
       }
     }
 

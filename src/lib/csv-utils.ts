@@ -79,7 +79,7 @@ export function writeCaptions(captions: CaptionRecord[], challenge_date: string)
     columns: ['user_id', 'challenge_date', 'caption', 'score', 'submission_time'],
   })
   fs.writeFileSync(filePath, csvContent)
-  console.log("content written to the file : ", filePath)
+  //console.log("content written to the file : ", filePath)
 }
 
 export function addCaption(record: Omit<CaptionRecord, 'score'>): void {
@@ -89,7 +89,7 @@ export function addCaption(record: Omit<CaptionRecord, 'score'>): void {
     score: 0,
   }
   captions.push(newRecord)
-  console.log("captions added, now no of captions : ", captions.length)
+  //console.log("captions added, now no of captions : ", captions.length)
   writeCaptions(captions, record.challenge_date)
 }
 

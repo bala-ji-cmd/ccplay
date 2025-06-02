@@ -207,9 +207,10 @@ export async function POST(req: Request) {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash-exp-image-generation",
+      // @ts-ignore - responseModalities is required for image generation but not in type definition
       generationConfig: {
         responseModalities: ['Text', 'Image']
-      }
+      } as any,
     });
 
     // Generate story based on type
@@ -221,16 +222,16 @@ export async function POST(req: Request) {
 
     const imagePrompt = 'Generate only image of a cheerful, soft-edged cartoon illustration for a children\'s book. ' + generatedStory.banner_image_description + ' Image size: 1024x768. Don\'t respond with anything else except the image.';
     
-    console.log("imagePrompt", imagePrompt);
-    console.log("calling gemini api for banner image");
+    //console.log("imagePrompt", imagePrompt);
+    //console.log("calling gemini api for banner image");
     const banner_image = await model.generateContent(imagePrompt);
 
 
     // let result = null;
-    for (const part of banner_image.response.candidates[0].content.parts) {
+    for (const part of banner_image.response.candidates?.[0]?.content?.parts || []) {
       // Based on the part type, either get the text or image data
       if (part.inlineData) {
-        console.log("Received image response : ", part.inlineData.data.length);
+        //console.log("Received image response : ", part.inlineData.data.length);
         
       } 
 
@@ -245,9 +246,9 @@ export async function POST(req: Request) {
     
   if (banner_image.response.candidates && banner_image.response.candidates[0].content.parts && banner_image.response.candidates[0].content.parts[0].inlineData) {
       generatedStory.banner_image = banner_image.response.candidates[0].content.parts[0].inlineData.data;
-      console.log("generated banner image size : ", generatedStory.banner_image.length);
+      //console.log("generated banner image size : ", generatedStory.banner_image.length);
     } else {
-      console.log("no banner image generated");
+      //console.log("no banner image generated");
       generatedStory.banner_image = null;
     }
 

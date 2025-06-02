@@ -76,10 +76,11 @@ export async function GET(request: Request) {
 
     const model = genAI.getGenerativeModel({
       model:  "gemini-2.0-flash-exp-image-generation",
+      // @ts-ignore - responseModalities is required for image generation but not in type definition
       generationConfig: {
         responseModalities: ['Text', 'Image']
-      },
-            safetySettings: [
+      } as any,
+      safetySettings: [
         {
           category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
           threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
@@ -109,14 +110,14 @@ The style should be whimsical and simple, allowing children to connect with the 
 
 Generate the only the image with the  ( 788 * 296 ) 16:9 aspect ratio to maintain quality. Don't respond with anything else but the image.`
 
-    console.log('[Daily Challenge] Calling Gemini API...')
+    console.log('[Daily Challenge] Calling LLM API...')
     const response = await model.generateContent(prompt)
-    console.log('[Daily Challenge] Gemini API response received')
+    console.log('[Daily Challenge] LLM API response received')
     let imageData = null
 
     if (response.response.candidates && response.response.candidates[0].content.parts && response.response.candidates[0].content.parts[0].inlineData) {
       imageData = response.response.candidates[0].content.parts[0].inlineData.data
-      console.log('[Daily Challenge] Daily contest image generated (size) :  ', imageData.length)
+      //console.log('[Daily Challenge] Daily contest image generated (size) :  ', imageData.length)
     }
 
     // Ensure directory exists

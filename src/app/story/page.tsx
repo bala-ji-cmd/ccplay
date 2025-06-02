@@ -84,7 +84,7 @@ export default function StoryPage() {
       setShowSubscriptionModal(true)
       return
     } else {
-      console.log("used credits for story")
+      //console.log("used credits for story")
     }
 
     if (!isRandom && !storyIdea) {

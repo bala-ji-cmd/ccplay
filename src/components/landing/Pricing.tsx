@@ -13,7 +13,7 @@ export function Pricing() {
 
   const handleSubscribe = async (planId: string) => {
     try {
-      console.log("handleSubscribe", planId)
+      //("handleSubscribe", planId)
       setIsLoading(true)
 
       const response = await fetch("/api/payments", {

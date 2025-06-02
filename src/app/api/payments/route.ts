@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     const { session, planId, isAnnual } = await req.json();
 
     if (!session) {
-      console.log('No session found')
+      //console.log('No session found')
       return NextResponse.json(
         { error: 'Not authenticated' },
         { status: 401 }

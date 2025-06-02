@@ -53,8 +53,8 @@ export default function LearnPage() {
 
   useEffect(() => {
     if (drawingSteps.length > 0) {
-      console.log('Updated drawing steps:', drawingSteps);
-      console.log('Current step data:', drawingSteps[currentStep]);
+      // console.log('Updated drawing steps:', drawingSteps);
+      // console.log('Current step data:', drawingSteps[currentStep]);
     }
   }, [drawingSteps, currentStep]);
 
@@ -81,7 +81,7 @@ export default function LearnPage() {
       setIsGenerating(true);
       setPrompt(inputPrompt);
 
-      console.log('Sending request with prompt:', inputPrompt);
+      // console.log('Sending request with prompt:', inputPrompt);
       const response = await fetch('/api/learn/generate', {
         method: 'POST',
         headers: {
@@ -91,7 +91,7 @@ export default function LearnPage() {
       });
 
       const data = await response.json();
-      console.log('Raw API Response:', data);
+      // console.log('Raw API Response:', data);
 
       if (!response.ok) {
         if (response.status === 400) {
@@ -104,7 +104,7 @@ export default function LearnPage() {
       }
 
       if (data.success && Array.isArray(data.steps)) {
-        console.log('Received steps:', data.steps);
+        // console.log('Received steps:', data.steps);
         setDrawingSteps(data.steps);
         setCurrentStep(0);
         setShowPromptBar(false);
@@ -121,12 +121,12 @@ export default function LearnPage() {
           }
         }, 100);
       } else {
-        console.error('Failed to generate drawing steps:', data.error);
+        // console.error('Failed to generate drawing steps:', data.error);
         setWarningMessage(data.error);
         setShowWarningModal(true);
       }
     } catch (error) {
-      console.error('Error generating drawing steps:', error);
+      // console.error('Error generating drawing steps:', error);
       setWarningMessage('Server is busy. Please try again later!');
       setShowWarningModal(true);
     } finally {
@@ -186,7 +186,7 @@ export default function LearnPage() {
       drawingSteps.forEach((step, index) => {
         try {
           if (!step.image) {
-            console.error(`No image found for step ${index + 1}`);
+            // console.error(`No image found for step ${index + 1}`);
             return;
           }
 
@@ -195,7 +195,7 @@ export default function LearnPage() {
           folder.file(`step-${index + 1}.png`, blob);
 
         } catch (error) {
-          console.error(`Error processing step ${index + 1}:`, error);
+          // console.error(`Error processing step ${index + 1}:`, error);
         }
       });
 
@@ -204,7 +204,7 @@ export default function LearnPage() {
       saveAs(content, `${downloadFileName}.zip`);
 
     } catch (error) {
-      console.error('Error creating zip file:', error);
+      // console.error('Error creating zip file:', error);
       setWarningMessage("Failed to create download file");
       setShowWarningModal(true);
     } finally {
@@ -246,14 +246,13 @@ export default function LearnPage() {
       if (error) throw error;
       
       setShareId(data.id);
-      // Show success feedback (you could add a toast notification here)
-      console.log('Drawing saved successfully!');
+      // console.log('Drawing saved successfully!');
 
       setIsSaved(true);
       return data;
 
     } catch (error) {
-      console.error('Error saving drawing:', error);
+      // console.error('Error saving drawing:', error);
       setWarningMessage(error instanceof Error ? error.message : "Failed to save drawing");
       setShowWarningModal(true);
     } finally {
@@ -281,7 +280,7 @@ export default function LearnPage() {
       await navigator.clipboard.writeText(shareUrl);
 
     } catch (error) {
-      console.error('Error sharing drawing:', error);
+      // console.error('Error sharing drawing:', error);
       setWarningMessage(error instanceof Error ? error.message : "Failed to share drawing");
       setShowWarningModal(true);
     } finally {
@@ -297,7 +296,7 @@ export default function LearnPage() {
       setDownloadFileName(prompt || 'my-drawing-steps');
       setShowDownloadModal(true);
     } catch (error) {
-      console.error('Error preparing download:', error);
+      // console.error('Error preparing download:', error);
       setWarningMessage(error instanceof Error ? error.message : "Failed to prepare download");
       setShowWarningModal(true);
     }

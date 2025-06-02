@@ -359,7 +359,7 @@ export default function DrawPage() {
     try {
       e.preventDefault();
     } catch (err) {
-      console.log('Touch event prevention skipped');
+      //console.log('Touch event prevention skipped');
     }
 
     const coords = getCoordinates(e);
@@ -482,9 +482,9 @@ export default function DrawPage() {
       
       const imageData = canvas.toDataURL('image/png');
      
-      console.log('imageData', imageData);
-      console.log('hasColorized', hasColorized);
-      console.log('isColorMode', isColorMode);
+      // console.log('imageData', imageData);
+      // console.log('hasColorized', hasColorized);
+      // console.log('isColorMode', isColorMode);
 
       // Save drawing
       const { data: drawingData, error: drawingError } = await supabase
@@ -498,7 +498,7 @@ export default function DrawPage() {
         .single();
 
       if (drawingError) throw drawingError;
-      console.log('saved drawing');
+      // console.log('saved drawing');
 
       if(!isSaved){
         // Check subscription status and use credits
@@ -506,7 +506,7 @@ export default function DrawPage() {
           setShowSubscriptionModal(true);
           return;
         } else {
-          console.log('used credits');
+          // console.log('used credits');
         }
       }
 
@@ -560,7 +560,7 @@ export default function DrawPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      console.log('downloaded drawing');
+      // console.log('downloaded drawing');
 
       
     } catch (error) {
@@ -583,63 +583,40 @@ export default function DrawPage() {
 
   // Update handleSubmit to use useCredits
   const handleSubmit = async (e: React.FormEvent) => {
-    e?.preventDefault();
-    if (!prompt.trim() || isLoading) return;
+    e.preventDefault();
+    if (!prompt.trim() || isLoading || isPrompting) return;
 
-    if (!user) {
-      router.push('/auth/login?redirectTo=/draw');
-      return;
-    }
-
-    playPop();
-    setIsPrompting(true);
     setIsLoading(true);
+    setIsPrompting(true);
 
     try {
       const canvas = canvasRef.current;
-      if (!canvas) return;
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = canvas.width;
-      tempCanvas.height = canvas.height;
-      const tempCtx = tempCanvas.getContext('2d');
-      if (!tempCtx) return;
+      if (!canvas) {
+        throw new Error("Canvas not initialized");
+      }
 
-      tempCtx.fillStyle = '#FFFFFF';
-      tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-      tempCtx.drawImage(canvas, 0, 0);
-
-      const drawingData = tempCanvas.toDataURL("image/png").split(",")[1];
-
-      const enhancedPrompt = `${prompt}. Create a black and white line drawing with pure black lines on white background, sized for a 1280 x 720 canvas (16:9 aspect ratio). Use simple, clean strokes without any shading or grayscale.`;
-
-      const requestPayload = {
-        prompt: enhancedPrompt,
-        drawingData,
-        customApiKey
-      };
+      const drawingData = canvas.toDataURL("image/png").split(",")[1];
 
       const response = await fetch("/api/draw/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestPayload),
+        body: JSON.stringify({
+          prompt,
+          drawingData,
+          customApiKey
+        }),
       });
+
       const data = await response.json();
 
       if (!response.ok) {
-        if (response.status === 400) {
-          setWarningMessage(data.error);
-          setShowWarningModal(true);
-          return;
-        } else {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        throw new Error(data.error || 'Failed to generate image');
       }
 
-
       if (data.success && data.imageData) {
-        console.log('[SUCCESS] Image data received:', data.imageData);
+        console.log('[SUCCESS] Image data received, length:', data.imageData.length);
         const newImage = `data:image/png;base64,${data.imageData}`;
         setGeneratedImage(newImage);
         setHasCanvasContent(true);
@@ -662,7 +639,7 @@ export default function DrawPage() {
         }
       } else {
         console.error("Failed to generate image:", data.error);
-        setErrorMessage(data.error);
+        setErrorMessage(data.error || 'Failed to generate image');
         setShowErrorModal(true);
       }
     } catch (error: unknown) {
@@ -779,7 +756,7 @@ export default function DrawPage() {
 
         // Now that all state updates are complete, save the drawing
         // await handleSave();
-        console.log('colorized, proceeding to save');
+        // console.log('colorized, proceeding to save');
       } else {
         console.error("Failed to colorize image:", data.error);
         setErrorMessage(data.error);

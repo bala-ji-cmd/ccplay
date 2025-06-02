@@ -52,9 +52,10 @@ export async function POST(request: Request) {
     // Set responseModalities to include "Image" so the model can generate an image
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash-exp-image-generation",
+      // @ts-ignore: responseModalities is required for image generation but not in type definition
       generationConfig: {
         responseModalities: ['Text', 'Image']
-      },
+      } as any,
       safetySettings: [
         {
             category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
@@ -94,10 +95,9 @@ export async function POST(request: Request) {
       generationContent = `${prompt}. Create a black and white hand-drawn sketch on a 1280 x 720 canvas (16:9 aspect ratio). Use thick, bold strokes similar to a heavy marker or ink pen. Ensure the lines are sharp, solid, and well-defined with no blurring, feathering, or shading—just clean black outlines on a white background`;
     }
 
-    console.log("Calling Gemini API...");
+    console.log("Calling LLM API...");
     const response = await model.generateContent(generationContent);
-    console.log("Gemini API response received");
-
+    console.log("LLM API response received");
 
     // Initialize response data
     const result = {
@@ -107,7 +107,15 @@ export async function POST(request: Request) {
     };
 
     // Process response parts
-    for (const part of response.response.candidates?.[0]?.content?.parts || []) {
+    if (!response.response?.candidates?.[0]?.content?.parts) {
+      console.error("No response parts received from Gemini API");
+      return NextResponse.json(
+        { success: false, error: 'No response received from Gemini API' },
+        { status: 500 }
+      );
+    }
+
+    for (const part of response.response.candidates[0].content.parts) {
       // Based on the part type, either get the text or image data
       if (part.text) {
         result.message = part.text;
@@ -119,6 +127,14 @@ export async function POST(request: Request) {
         // Include the base64 data in the response
         result.imageData = imageData;
       }
+    }
+
+    if (!result.imageData) {
+      console.error("No image data received in response");
+      return NextResponse.json(
+        { success: false, error: 'No image was generated' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(result);
@@ -135,12 +151,14 @@ export async function POST(request: Request) {
           },
           { status: 400 }
       );
-  }
+    }
 
+    // More detailed error response
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to generate image'
+        error: error instanceof Error ? error.message : 'Failed to generate image',
+        details: error instanceof Error ? error.stack : undefined
       },
       { status: 500 }
     );

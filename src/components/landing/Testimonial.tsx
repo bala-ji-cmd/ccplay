@@ -75,10 +75,10 @@ export function Testimonial() {
                     className="text-lg font-bold text-[#58CC02]"
                     style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
                   >
-                    Sarah Johnson
+                    Priya Sharma
                   </h3>
                   <p className="text-[#4B4B4B] text-sm" style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}>
-                    Mom of Emma, 4
+                    Mom of Aarav, 4
                   </p>
                 </div>
               </div>
@@ -104,9 +104,9 @@ export function Testimonial() {
               </div>
 
               <p className="text-[#4B4B4B] mb-4" style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}>
-                "My daughter was always frustrated trying to draw her favorite Cocomelon characters, but with Cocomelon
-                Play she can now <span className="text-[#FF4B4B] font-bold">create amazing artwork</span> all by
-                herself! The AI guidance is so intuitive even for a 4-year-old."
+                "My son was always trying to draw his favorite Cocomelon characters but would get frustrated. With Cocomelon
+                Play, he can now <span className="text-[#FF4B4B] font-bold">create beautiful artwork</span> all by
+                himself! The AI guidance is so simple that even my 4-year-old can use it without any help."
               </p>
 
               <div className="flex items-center gap-2 bg-[#E5FFC2] p-2 rounded-lg">
@@ -190,10 +190,10 @@ export function Testimonial() {
                     className="text-lg font-bold text-[#1CB0F6]"
                     style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
                   >
-                    Michael Thompson
+                    Rajesh Patel
                   </h3>
                   <p className="text-[#4B4B4B] text-sm" style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}>
-                    Dad of Liam, 5
+                    Dad of Vihaan, 5
                   </p>
                 </div>
               </div>
@@ -219,9 +219,9 @@ export function Testimonial() {
               </div>
 
               <p className="text-[#4B4B4B] mb-4" style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}>
-                "The animation feature is a game-changer! My son spends hours creating and then{" "}
-                <span className="text-[#1CB0F6] font-bold">watching his drawings come to life</span>. It's educational
-                and entertaining at the same time. Worth every penny of the subscription!"
+                "The story generation feature is amazing! My son spends hours creating and then{" "}
+                <span className="text-[#1CB0F6] font-bold">listening to personalized bedtime stories</span>. It's both educational
+                and entertaining - perfect for keeping him engaged during summer vacations. The moral values in each story make it worth every rupee!"
               </p>
 
               <div className="flex items-center gap-2 bg-[#E2F4FF] p-2 rounded-lg">
@@ -235,19 +235,16 @@ export function Testimonial() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="lucide lucide-clapperboard"
+                  className="lucide lucide-book-open"
                 >
-                  <path d="M4 11v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8H4Z" />
-                  <path d="m4 11-.88-2.87a2 2 0 0 1 1.33-2.5l11.48-3.5a2 2 0 0 1 2.5 1.33l.87 2.87L4 11.01Z" />
-                  <path d="m6.6 4.99 3.38 4.2" />
-                  <path d="m11.86 3.38 3.38 4.2" />
-                  <path d="m17.13 1.77 3.38 4.2" />
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
                 </svg>
                 <span
                   className="text-sm font-medium text-[#1CB0F6]"
                   style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
                 >
-                  Favorite feature: Animation Magic
+                  Favorite feature: Story with AI
                 </span>
               </div>
             </div>
@@ -304,10 +301,10 @@ export function Testimonial() {
                     className="text-lg font-bold text-[#78510D]"
                     style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
                   >
-                    Jennifer Rodriguez
+                    Ananya Reddy
                   </h3>
                   <p className="text-[#4B4B4B] text-sm" style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}>
-                    Mom of Sophia, 3
+                    Mom of Diya, 3
                   </p>
                 </div>
               </div>
@@ -336,7 +333,7 @@ export function Testimonial() {
                 "My 3-year-old was too young to draw properly, but with Cocomelon Play's{" "}
                 <span className="text-[#FFC800] font-bold">step-by-step guides</span> and{" "}
                 <span className="text-[#8549BA] font-bold">voice commands</span>, she's creating beautiful Cocomelon
-                art! The daily challenges keep her coming back for more."
+                art! The daily challenges keep her engaged and away from too much screen time. Perfect for our Indian family!"
               </p>
 
               <div className="flex items-center gap-2 bg-[#FFF9E5] p-2 rounded-lg">
