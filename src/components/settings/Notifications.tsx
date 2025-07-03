@@ -4,14 +4,7 @@ import { useState, useEffect } from "react"
 import { useSubscription } from "@/hooks/useSubscription"
 import { Button } from "@/components/ui/button"
 import { Bell, AlertTriangle, Info, AlertCircle, Check } from "lucide-react"
-
-interface Notification {
-  id: string
-  type: "warning" | "info" | "error"
-  message: string
-  timestamp: string
-  isRead: boolean
-}
+import type { Notification } from '@/types'
 
 export function Notifications() {
   const { subscriptionStatus } = useSubscription()

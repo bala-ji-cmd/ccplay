@@ -9,12 +9,9 @@ import { useEffect, useState } from "react"
 export function HeroSection() {
   const { user } = useAuth()
   const router = useRouter()
-  const [mounted, setMounted] = useState(false)
   const [bounce, setBounce] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-
     // Create bouncing effect for characters
     const interval = setInterval(() => {
       setBounce((prev) => !prev)
@@ -31,10 +28,6 @@ export function HeroSection() {
       // User is not logged in, redirect to login page with return URL
       await router.push("/auth/login?redirectTo=/draw")
     }
-  }
-
-  if (!mounted) {
-    return null // or a loading skeleton
   }
 
   return (
@@ -165,7 +158,7 @@ export function HeroSection() {
 
                 <div className="relative rounded-2xl overflow-hidden">
                   <Image
-                    src="/hero-image-new.png"
+                    src="/hero/hero2.png"
                     alt="Kids drawing with JJ and Cocomelon friends"
                     width={500}
                     height={400}
@@ -173,7 +166,7 @@ export function HeroSection() {
                   />
 
                   {/* Character animations */}
-                  <div
+                  {/* <div
                     className={`absolute bottom-4 left-4 transition-transform duration-300 ${bounce ? "transform translate-y-1" : ""}`}
                   >
                     <Image src="/jj-happy.png" alt="JJ" width={60} height={60} className="filter drop-shadow-lg" />
@@ -195,7 +188,7 @@ export function HeroSection() {
                       height={45}
                       className="filter drop-shadow-lg"
                     />
-                  </div>
+                  </div> */}
                 </div>
               </div>
 

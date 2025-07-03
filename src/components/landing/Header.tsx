@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useAuth } from "@/contexts/AuthContext"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { useSubscription } from "@/hooks/useSubscription"
 import { motion } from "framer-motion"
@@ -91,42 +91,58 @@ const navigationItems = [
       </svg>
     ),
   },
-  //   {
-  //     name: 'Pricing',
-  //     href: '/pricing',
-  //     icon: (
-  //       <svg
-  //         xmlns="http://www.w3.org/2000/svg"
-  //         width="20"
-  //         height="20"
-  //         viewBox="0 0 24 24"
-  //         fill="none"
-  //         stroke="currentColor"
-  //         strokeWidth="2"
-  //         strokeLinecap="round"
-  //         strokeLinejoin="round"
-  //       >
-  //         <path d="M2.5 19.5L22 19.5" />
-  //         <path d="M3.5 5.5L7.5 9.5" />
-  //         <path d="M8.5 4.5L6.5 10.5" />
-  //         <path d="M11.5 4.5L9.5 10.5" />
-  //         <path d="M14.5 4.5L12.5 10.5" />
-  //         <path d="M17.5 4.5L15.5 10.5" />
-  //         <path d="M20.5 4.5L18.5 10.5" />
-  //       </svg>
-  //     ),
-  //   },
 ]
 
 export function Header() {
   const { user, signOut } = useAuth()
   const router = useRouter()
   const [showDropdown, setShowDropdown] = useState(false)
-  const { subscriptionStatus, refreshSubscription } = useSubscription()
-  const [prevCredits, setPrevCredits] = useState(subscriptionStatus?.creditsLeft || -1)
-  const [isAnimating, setIsAnimating] = useState(false)
+  const { subscriptionStatus, isLoading } = useSubscription()
   const dropdownRef = useRef<HTMLDivElement>(null)
+  
+  // Track previous credits for animation - improved tracking
+  const prevCreditsRef = useRef<number | null>(null)
+  const [isAnimating, setIsAnimating] = useState(false)
+  
+  // Memoize user initial to prevent unnecessary re-renders
+  const userInitial = useMemo(() => {
+    return user?.user_metadata?.childName?.[0]?.toUpperCase() || ''
+  }, [user?.user_metadata?.childName])
 
+  // Memoize child name to prevent unnecessary re-renders
+  const childName = useMemo(() => {
+    return user?.user_metadata?.childName || ''
+  }, [user?.user_metadata?.childName])
+
+  // Memoize credits display to prevent unnecessary re-renders
+  const creditsDisplay = useMemo(() => {
+    if (isLoading && subscriptionStatus?.creditsLeft === undefined) {
+      return "Loading..."
+    }
+    return subscriptionStatus?.creditsLeft ?? 0
+  }, [subscriptionStatus?.creditsLeft, isLoading])
+
+  // Handle credit change animation - improved logic
+  useEffect(() => {
+    const currentCredits = subscriptionStatus?.creditsLeft
+    
+    if (currentCredits !== undefined && 
+        prevCreditsRef.current !== null && 
+        prevCreditsRef.current !== currentCredits) {
+      
+      setIsAnimating(true)
+      const timer = setTimeout(() => setIsAnimating(false), 600)
+      
+      return () => clearTimeout(timer)
+    }
+    
+    // Update previous credits reference
+    if (currentCredits !== undefined) {
+      prevCreditsRef.current = currentCredits
+    }
+  }, [subscriptionStatus?.creditsLeft])
+
+  // Handle click outside dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -134,38 +150,11 @@ export function Header() {
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => document.removeEventListener("mousedown", handleClickOutside)
     }
-  }, [])
-
-  // Effect to setup real-time subscription updates
-  useEffect(() => {
-    if (!user?.id) return
-
-    // Initial fetch
-    refreshSubscription()
-
-    console.log("refreshed subscription", subscriptionStatus?.creditsLeft)
-
-    // // Subscribe to real-time changes
-    // const subscription = supabase
-    //     .channel('credits_changes')
-    //     .on('postgres_changes', {
-    //         event: '*',
-    //         schema: 'public',
-    //         table: 'subscriptions',
-    //         filter: `user_id=eq.${user.id}`
-    //     }, () => {
-    //         refreshSubscription();
-    //     })
-    //     .subscribe();
-
-    // return () => {
-    //     subscription.unsubscribe();
-    // };
-  }, [user?.id, refreshSubscription])
+  }, [showDropdown])
 
   const handleSignOut = async () => {
     try {
@@ -175,6 +164,13 @@ export function Header() {
       console.error("Error signing out:", error)
     }
   }
+
+  // Improved logic for showing credits - more robust
+  const shouldShowCredits = useMemo(() => {
+    return user && 
+           subscriptionStatus && 
+           (subscriptionStatus.creditsLeft !== undefined || isLoading)
+  }, [user, subscriptionStatus, isLoading])
 
   return (
     <header className="w-full bg-[#FFF4E5] py-2 px-4">
@@ -230,29 +226,39 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        {user && (
+
+        {/* Credits Display - Enhanced with loading state */}
+        {shouldShowCredits && (
           <div className="flex items-center gap-2">
-            {subscriptionStatus?.creditsLeft && (
-              <motion.div
-                animate={
-                  isAnimating
-                    ? {
-                        scale: [1, 1.2, 0.9, 1.1, 1],
-                        rotate: [0, 10, -10, 5, 0],
-                      }
-                    : { scale: 1, rotate: 0 }
-                }
-                transition={{ duration: 0.5 }}
-                className="bg-white border-4 border-[#FFD900] text-[#8549BA] hover:bg-[#FFF9E5] 
-         hover:text-[#FF4D79] rounded-full px-4 py-2 text-sm font-bold shadow-lg 
-         transition-all hover:scale-105 flex items-center gap-2"
-                style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
-              >
-                <span className="text-[#FF4D79]">✨</span> {subscriptionStatus?.creditsLeft || -1} Credits
-              </motion.div>
-            )}
+            <motion.div
+              animate={
+                isAnimating
+                  ? {
+                      scale: [1, 1.2, 0.95, 1.1, 1],
+                      rotate: [0, 8, -8, 4, 0],
+                    }
+                  : { scale: 1, rotate: 0 }
+              }
+              transition={{ 
+                duration: 0.6,
+                ease: "easeInOut"
+              }}
+              className={`bg-white border-4 border-[#FFD900] text-[#8549BA] hover:bg-[#FFF9E5] 
+                         hover:text-[#FF4D79] rounded-full px-4 py-2 text-sm font-bold shadow-lg 
+                         transition-all hover:scale-105 flex items-center gap-2 min-w-[120px] justify-center
+                         ${isLoading && !subscriptionStatus ? 'animate-pulse' : ''}`}
+              style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+            >
+              <span className="text-[#FF4D79]">✨</span> 
+              <span className={`transition-colors duration-300 ${
+                isAnimating ? 'text-[#FF4D79]' : 'text-[#8549BA]'
+              }`}>
+                {creditsDisplay} Credits
+              </span>
+            </motion.div>
           </div>
         )}
+
         <div className="flex items-center gap-2">
           {user ? (
             <div className="relative" ref={dropdownRef}>
@@ -265,7 +271,7 @@ export function Header() {
               >
                 <div className="w-8 h-8 bg-gradient-to-br from-[#FF4D79] to-[#8549BA] rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-bold">
-                    {user.user_metadata.childName?.[0].toUpperCase()}
+                    {userInitial}
                   </span>
                 </div>
                 <span className="hidden md:inline text-sm">Welcome!</span>
@@ -301,14 +307,32 @@ export function Header() {
                       className="text-sm font-bold text-[#4B4B4B] truncate"
                       style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
                     >
-                      {user.user_metadata.childName}
+                      {childName}
                     </p>
                   </div>
+
+                  {/* Show subscription info in dropdown if available */}
+                  {subscriptionStatus && (
+                    <div className="px-4 py-2 border-b-2 border-dashed border-[#FFD900]">
+                      <p className="text-xs text-[#8549BA]" style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}>
+                        {subscriptionStatus.planType?.toUpperCase()} Plan
+                      </p>
+                      <p className="text-xs text-[#4B4B4B]" style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}>
+                        {subscriptionStatus.creditsLeft} credits remaining
+                      </p>
+                      <p className={`text-xs ${subscriptionStatus.isActive ? 'text-[#58CC02]' : 'text-[#FF4B4B]'}`} 
+                         style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}>
+                        {subscriptionStatus.isActive ? 'Active' : 'Inactive'}
+                      </p>
+                    </div>
+                  )}
+
                   <div className="py-2 space-y-1">
                     <Link
                       href="/app/profile"
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#4B4B4B] hover:bg-[#E5FFC2] transition-colors"
                       style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+                      onClick={() => setShowDropdown(false)}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -330,6 +354,7 @@ export function Header() {
                       href="/app/settings"
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#4B4B4B] hover:bg-[#E5FFC2] transition-colors"
                       style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+                      onClick={() => setShowDropdown(false)}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -351,6 +376,7 @@ export function Header() {
                       href="/app/notifications"
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#4B4B4B] hover:bg-[#E5FFC2] transition-colors"
                       style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+                      onClick={() => setShowDropdown(false)}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

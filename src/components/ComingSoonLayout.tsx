@@ -4,14 +4,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { memo } from "react"
-
-interface ComingSoonProps {
-  title: string
-  subtitle: string
-  description: string
-  features: string[]
-  icon: React.ReactNode
-}
+import type { ComingSoonProps } from '@/types'
 
 const FeatureItem = memo(({ feature }: { feature: string }) => (
   <li className="flex items-center gap-3 text-[#5D5D5D] bg-blue-50 p-4 rounded-xl">

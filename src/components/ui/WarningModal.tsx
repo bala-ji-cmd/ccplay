@@ -1,19 +1,7 @@
 import { motion } from "framer-motion";
 import { AlertTriangle, X } from "lucide-react";
 import { Button } from "./button";
-
-interface Action {
-    label: string;
-    onClick: () => void;
-    variant?: 'default' | 'secondary' | 'ghost' | 'link' | 'outline' | 'destructive';
-}
-
-interface WarningModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    message: string;
-    actions?: Action[];
-}
+import type { Action, WarningModalProps } from '@/types'
 
 export function WarningModal({ isOpen, onClose, message, actions = [] }: WarningModalProps) {
     if (!isOpen) return null;

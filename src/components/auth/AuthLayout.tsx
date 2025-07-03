@@ -1,10 +1,5 @@
 import Image from "next/image"
-
-interface AuthLayoutProps {
-  children: React.ReactNode
-  title: string
-  subtitle?: string
-}
+import type { AuthLayoutProps } from '@/types'
 
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   return (

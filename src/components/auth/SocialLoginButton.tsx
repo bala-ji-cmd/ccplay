@@ -1,10 +1,6 @@
 'use client'
 
-interface SocialLoginButtonProps {
-  provider: 'google' | 'apple'
-  onClick: () => void
-  isLoading?: boolean
-}
+import type { SocialLoginButtonProps } from '@/types'
 
 export function SocialLoginButton({ provider, onClick, isLoading }: SocialLoginButtonProps) {
   const icons = {

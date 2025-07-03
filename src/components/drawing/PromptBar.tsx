@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-
-interface PromptBarProps {
-  onSubmit: (prompt: string) => void;
-  isGenerating: boolean;
-  onNewDrawing: () => void;
-}
+import type { PromptBarProps } from '@/types'
 
 export function PromptBar({ onSubmit, isGenerating, onNewDrawing }: PromptBarProps) {
   const [inputValue, setInputValue] = useState("");

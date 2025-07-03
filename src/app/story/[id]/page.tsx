@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
-import type { BedtimeStory } from "@/lib/supabase"
+import type { BedtimeStory } from "@/types"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"

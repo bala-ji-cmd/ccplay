@@ -3,19 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
-
-interface AuthContextType {
-  user: User | null
-  session: Session | null
-  loading: boolean
-  signUp: (email: string, password: string, metadata?: any) => Promise<any>
-  signIn: (email: string, password: string) => Promise<any>
-  signOut: () => Promise<void>
-  resetPassword: (email: string) => Promise<void>
-  updatePassword: (newPassword: string) => Promise<void>
-  signInWithGoogle: (redirectTo?: string) => Promise<void>
-  signInWithApple: (redirectTo?: string) => Promise<void>
-}
+import type { AuthContextType } from '@/types'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 

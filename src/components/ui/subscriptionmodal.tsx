@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useRouter } from 'next/navigation';
 
 
-export const SubscriptionModal = ({message}: {message: string}) => {
+export const SubscriptionModal = ({message, onClose}: {message: string, onClose: () => void}) => {
     const router = useRouter(); // Initialize the router here
     return (
          // Add subscription modal
@@ -12,8 +12,9 @@ export const SubscriptionModal = ({message}: {message: string}) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
     >
-      <div className="bg-white rounded-2xl p-8 max-w-md w-full">
+      <div className="bg-white rounded-2xl p-8 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
         <h2 
           className="text-2xl font-bold mb-4 text-center"
           style={{ fontFamily: "'Comic Sans MS', 'Bubblegum Sans', cursive" }}
@@ -31,7 +32,7 @@ export const SubscriptionModal = ({message}: {message: string}) => {
             View Pricing Plans 🎨
           </button>
           <button
-            onClick={() => router.push('/')}    
+            onClick={onClose}    
             className="w-full py-3 border border-gray-200 rounded-full hover:bg-gray-50"
           >
             Go to Home

@@ -2,14 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { parse } from 'csv-parse/sync'
 import { stringify } from 'csv-stringify/sync'
-
-interface CaptionRecord {
-  user_id: string
-  challenge_date: string
-  caption: string
-  score: number
-  submission_time: string
-}
+import type { CaptionRecord } from '@/types'
 
 const CAPTIONS_FILE = 'captions.csv'
 const RESULTS_COMPUTED_FILE = 'results_computed.json'

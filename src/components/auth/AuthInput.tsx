@@ -1,11 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-
-interface AuthInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string
-  error?: string
-}
+import type { AuthInputProps } from '@/types'
 
 export function AuthInput({ label, error, type, ...props }: AuthInputProps) {
   const [showPassword, setShowPassword] = useState(false)

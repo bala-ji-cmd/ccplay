@@ -1,15 +1,4 @@
-interface Step {
-  title?: string;
-  step?: number;
-  instruction?: string;
-  image?: string;
-}
-
-interface StepGalleryProps {
-  steps: Step[];
-  currentStep: number;
-  setCurrentStep: (step: number) => void;
-}
+import type { Step, StepGalleryProps } from '@/types'
 
 export function StepGallery({ steps, currentStep, setCurrentStep }: StepGalleryProps) {
   if (!steps?.length) {

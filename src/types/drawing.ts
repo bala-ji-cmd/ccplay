@@ -48,4 +48,31 @@ export type DrawingEvent = (React.MouseEvent<HTMLCanvasElement> | React.TouchEve
     touches?: TouchList;
     changedTouches?: TouchList;
   };
+}
+
+export interface Step {
+  title?: string;
+  step?: number;
+  instruction?: string;
+  image?: string;
+}
+
+export interface StepGalleryProps {
+  steps: Step[];
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+}
+
+export interface PromptBarProps {
+  onSubmit: (prompt: string) => void;
+  isGenerating: boolean;
+  onNewDrawing: () => void;
+}
+
+export interface DrawingCanvasProps {
+  currentImage: string;
+  currentInstruction: string;
+  stepNumber: number;
+  totalSteps: number;
+  onStepChange: (step: number) => void;
 } 

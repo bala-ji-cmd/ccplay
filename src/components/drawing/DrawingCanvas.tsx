@@ -3,14 +3,7 @@
 import { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-interface DrawingCanvasProps {
-  currentImage: string;
-  currentInstruction: string;
-  stepNumber: number;
-  totalSteps: number;
-  onStepChange: (step: number) => void;
-}
+import type { DrawingCanvasProps } from '@/types'
 
 export function DrawingCanvas({ currentImage, currentInstruction, stepNumber, totalSteps, onStepChange }: DrawingCanvasProps) {
   // Add keyboard navigation
