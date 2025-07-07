@@ -5,6 +5,8 @@ import { useSubscription } from "@/hooks/useSubscription"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 import type { BedtimeStory } from "@/types"
+import logger from "@/lib/client-logger"
+import { useError } from "@/contexts/ErrorContext"
 
 interface StoryFormData {
   storyIdea: string
@@ -16,6 +18,7 @@ export const useStoryCreation = (addStoryToCache: (story: BedtimeStory) => void)
   const router = useRouter()
   const { user, session } = useAuth()
   const { subscriptionStatus, useCredits } = useSubscription()
+  const { setErrorMessage } = useError()
   
   const [formData, setFormData] = useState<StoryFormData>({
     storyIdea: "",
@@ -43,18 +46,18 @@ export const useStoryCreation = (addStoryToCache: (story: BedtimeStory) => void)
 
     // Check subscription status without making additional DB calls
     if (!subscriptionStatus || (!subscriptionStatus.isActive && subscriptionStatus.planType !== "tier2")) {
-      console.log("subscriptionStatus", subscriptionStatus)
+      logger.warn("Subscription status check failed", { subscriptionStatus });
       return { needsUpgrade: true }
     }
 
     // Check credits before proceeding
     if (!canGenerate) {
-      console.log("canGenerate", canGenerate)
+      logger.warn("Credit check failed", { canGenerate });
       return { needsUpgrade: true }
     }
 
     if (!isRandom && !formData.storyIdea.trim()) {
-      toast.error("Please enter a story idea")
+      setErrorMessage("Please enter a story idea");
       return { success: false }
     }
 
@@ -67,7 +70,7 @@ export const useStoryCreation = (addStoryToCache: (story: BedtimeStory) => void)
         return { needsUpgrade: true }
       }
 
-      console.log("Credits used for story generation")
+      logger.info("Credits used for story generation")
 
       // Generate story using AI
       const response = await fetch("/api/story/generate", {
@@ -82,7 +85,10 @@ export const useStoryCreation = (addStoryToCache: (story: BedtimeStory) => void)
         }),
       })
 
-      if (!response.ok) throw new Error("Failed to generate story")
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate story");
+      }
       const storyData = await response.json()
 
       // Store story in Supabase
@@ -112,15 +118,15 @@ export const useStoryCreation = (addStoryToCache: (story: BedtimeStory) => void)
       toast.success("Story created successfully!")
       
       return { success: true, story }
-    } catch (err) {
-      console.error("Error creating story:", err)
-      toast.error("Failed to create story")
+    } catch (err: any) {
+      logger.error("Error creating story:", err)
+      setErrorMessage(err.message || 'DEFAULT_ERROR');
       return { success: false }
     } finally {
       setIsGenerating(false)
       setShowCustomForm(false)
     }
-  }, [session?.user?.id, subscriptionStatus, canGenerate, formData, useCredits, addStoryToCache, router])
+  }, [session?.user?.id, subscriptionStatus, canGenerate, formData, useCredits, addStoryToCache, router, setErrorMessage])
 
   return {
     formData,

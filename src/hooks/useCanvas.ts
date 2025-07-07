@@ -13,16 +13,19 @@ export const useCanvas = () => {
     const [pencilSize, setPencilSize] = useState<number>(6);
     const [eraserSize, setEraserSize] = useState<number>(10);
     const [hasCanvasContent, setHasCanvasContent] = useState(false);
+    const [isInitialized, setIsInitialized] = useState(false);
 
     const get2dContext = useCallback(() => canvasRef.current?.getContext('2d'), []);
 
     const initializeCanvas = useCallback(() => {
         const ctx = get2dContext();
-        if (!canvasRef.current || !ctx) return;
+        if (!canvasRef.current || !ctx || isInitialized) return;
+        
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
         setHasCanvasContent(false);
-    }, [get2dContext]);
+        setIsInitialized(true);
+    }, [get2dContext, isInitialized]);
     
     useEffect(() => {
         initializeCanvas();
@@ -153,6 +156,7 @@ export const useCanvas = () => {
 
         backgroundImageRef.current = null;
         setHasCanvasContent(false);
+        setIsInitialized(false);
         const blankState = canvas.toDataURL();
         setCanvasHistory([blankState]);
         setCurrentHistoryIndex(0);

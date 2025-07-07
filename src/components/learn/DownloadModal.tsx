@@ -53,7 +53,7 @@ export const DownloadModal = ({ isOpen, onClose, onSubmit, isDownloading, fileNa
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm border-2 border-[#E5E5E5] rounded-xl hover:bg-[#F7F7F7] font-bold"
+              className="px-4 py-2 text-sm bg-[#FF4B4B] text-white rounded-xl hover:bg-red-600 font-bold border-b-2 border-red-700"
             >
               Cancel
             </button>

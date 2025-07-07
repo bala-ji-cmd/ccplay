@@ -6,6 +6,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from '@/lib/supabase';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import { useError } from '@/contexts/ErrorContext';
 
 interface Step {
   title?: string;
@@ -29,6 +30,7 @@ export const useLearnDrawing = () => {
     const { subscriptionStatus, useCredits } = useSubscription();
     const { user } = useAuth();
     const router = useRouter();
+    const { setErrorMessage } = useError();
 
     const [prompt, setPrompt] = useState("");
     const [drawingSteps, setDrawingSteps] = useState<Step[]>([]);
@@ -38,13 +40,11 @@ export const useLearnDrawing = () => {
     const [isSaved, setIsSaved] = useState(false);
     const [shareId, setShareId] = useState<string | null>(null);
 
-    const [error, setError] = useState<string | null>(null);
-
     useEffect(() => {
         if (subscriptionStatus && (subscriptionStatus.planType !== 'tier2' && subscriptionStatus.planType !== 'tier3' || !subscriptionStatus.isActive)) {
-            setError("This feature is not available for your plan. Please upgrade to a higher plan to use this feature.");
+            setErrorMessage("This feature is not available for your plan. Please upgrade to a higher plan to use this feature.");
         }
-    }, [subscriptionStatus]);
+    }, [subscriptionStatus, setErrorMessage]);
 
     const handlePromptSubmit = async (inputPrompt: string) => {
         if (!user) {
@@ -53,7 +53,7 @@ export const useLearnDrawing = () => {
         }
 
         if (!(await useCredits(25, 'learn'))) {
-            setError("You don't have enough credits. Please upgrade your plan.");
+            setErrorMessage("You don't have enough credits. Please upgrade your plan.");
             return;
         }
 
@@ -61,6 +61,8 @@ export const useLearnDrawing = () => {
         setPrompt(inputPrompt);
 
         try {
+            console.log('[learn] Starting generation for prompt:', inputPrompt);
+            
             const response = await fetch('/api/learn/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -74,6 +76,14 @@ export const useLearnDrawing = () => {
             }
 
             if (data.success && Array.isArray(data.steps)) {
+                console.log('[learn] Successfully generated', data.steps.length, 'steps');
+                
+                // Validate that we got exactly 6 steps
+                if (data.steps.length !== 6) {
+                    console.warn('[learn] Expected 6 steps but got', data.steps.length);
+                    throw new Error(`Expected 6 drawing steps but received ${data.steps.length}. Please try again!`);
+                }
+                
                 setDrawingSteps(data.steps);
                 setCurrentStep(0);
                 setIsSaved(false);
@@ -82,7 +92,8 @@ export const useLearnDrawing = () => {
                 throw new Error(data.error || 'Failed to generate drawing steps.');
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Server is busy. Please try again later!');
+            console.error('[learn] Error during generation:', err);
+            setErrorMessage(err instanceof Error ? err.message : 'DEFAULT_ERROR');
         } finally {
             setIsGenerating(false);
         }
@@ -113,7 +124,7 @@ export const useLearnDrawing = () => {
             setIsSaved(true);
             return data;
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to save drawing");
+            setErrorMessage(err instanceof Error ? err.message : "DEFAULT_ERROR");
             return null;
         } finally {
             setIsGenerating(false);
@@ -147,7 +158,7 @@ export const useLearnDrawing = () => {
             const content = await zip.generateAsync({ type: "blob" });
             saveAs(content, `${fileName}.zip`);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to create download file");
+            setErrorMessage(err instanceof Error ? err.message : "DEFAULT_ERROR");
         } finally {
             setIsDownloading(false);
         }
@@ -174,8 +185,6 @@ export const useLearnDrawing = () => {
         isGenerating,
         isDownloading,
         shareId,
-        error,
-        setError,
         handlePromptSubmit,
         handleSave,
         handleShare,

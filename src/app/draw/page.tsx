@@ -13,7 +13,7 @@ import EditsCounter from "@/components/ui/edits-counter";
 import { ShareModal } from "@/components/drawing/modals/ShareModal";
 import { DownloadModal } from "@/components/drawing/modals/DownloadModal";
 import { NewDrawingModal } from "@/components/drawing/modals/NewDrawingModal";
-import { ErrorModal } from "@/components/drawing/modals/ErrorModal";
+import { EditNameModal } from "@/components/drawing/modals/EditNameModal";
 import { VersionHistory } from "@/components/drawing/VersionHistory";
 import { HowItWorks } from "@/components/drawing/HowItWorks";
 import { useDrawingOrchestrator } from "@/hooks/useDrawingOrchestrator";
@@ -31,7 +31,7 @@ export default function DrawPage() {
     drawingName, setDrawingName,
     editCount,
     maxEdits,
-    isEditingName, setIsEditingName,
+
     isInFinalState,
     isPrompting,
     showStrokeOptions, setShowStrokeOptions,
@@ -39,9 +39,9 @@ export default function DrawPage() {
     warningMessage,
     versionHistory,
     shareId, setShareId,
-    showErrorModal, setShowErrorModal,
     showNewDrawingModal, setShowNewDrawingModal,
     showSubscriptionModal, setShowSubscriptionModal,
+    showEditNameModal, setShowEditNameModal,
     canvasRef,
     activeTool, setActiveTool,
     pencilSize, setPencilSize,
@@ -161,31 +161,16 @@ export default function DrawPage() {
         <div className="w-full">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-4">
-              {isEditingName ? (
-                <motion.input
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  type="text"
-                  value={drawingName}
-                  onChange={(e) => setDrawingName(e.target.value)}
-                  onBlur={() => setIsEditingName(false)}
-                  onKeyDown={(e) => e.key === "Enter" && setIsEditingName(false)}
-                  className="px-3 py-1 border-4 border-[#FFD900] rounded-xl focus:outline-none focus:border-[#FFC800] text-2xl sm:text-3xl font-bold bg-white text-[#8549BA]"
-                  style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
-                  autoFocus
-                />
-              ) : (
-                <motion.div
-                  className="flex items-center gap-2 cursor-pointer group"
-                  onClick={() => setIsEditingName(true)}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <h1 className="text-2xl sm:text-3xl font-bold text-[#8549BA] group-hover:text-[#7038A8]" style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}>
-                    {drawingName}
-                  </h1>
-                  <Pencil className="w-4 h-4 text-[#8549BA] opacity-0 group-hover:opacity-100 transition-opacity" />
-                </motion.div>
-              )}
+              <motion.div
+                className="flex items-center gap-2 cursor-pointer group"
+                onClick={() => setShowEditNameModal(true)}
+                whileHover={{ scale: 1.02 }}
+              >
+                <h1 className="text-2xl sm:text-3xl font-bold text-[#8549BA] group-hover:text-[#7038A8]" style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}>
+                  {drawingName}
+                </h1>
+                <Pencil className="w-4 h-4 text-[#8549BA] opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.div>
               <motion.button
                 onClick={handleStartNewDrawing}
                 className="bg-[#8549BA] text-white hover:bg-[#7038A8] rounded-full p-2 shadow-md"
@@ -334,9 +319,7 @@ export default function DrawPage() {
             )}
           </motion.div>
 
-          {!isEditingName && (
-            <>
-              <div className={`${canvasWrapperClass} mb-4`}>
+          <div className={`${canvasWrapperClass} mb-4`}>
                 <canvas
                   ref={canvasRef}
                   width={1280}
@@ -435,14 +418,12 @@ export default function DrawPage() {
                   </div>
                 )}
               </div>
-            </>
-          )}
         </div>
 
-        {showErrorModal && <ErrorModal initialApiKey={customApiKey} onSubmit={setCustomApiKey} onClose={() => setShowErrorModal(false)} />}
         {showShareModal && <ShareModal shareId={shareId} onClose={() => { setShowShareModal(false); setShareId(null); }} />}
         {showDownloadModal && <DownloadModal initialFileName={drawingName} onSave={handleDownloadSave} onClose={() => setShowDownloadModal(false)} />}
         {showNewDrawingModal && <NewDrawingModal onConfirm={resetCanvasState} onClose={() => setShowNewDrawingModal(false)} />}
+        {showEditNameModal && <EditNameModal isOpen={showEditNameModal} onClose={() => setShowEditNameModal(false)} onSave={setDrawingName} currentName={drawingName} />}
         
         {versionHistory.length > 0 && <VersionHistory versionHistory={versionHistory} />}
       </main>

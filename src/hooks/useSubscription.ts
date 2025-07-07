@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useError } from '@/contexts/ErrorContext';
 import type { SubscriptionStatus } from '@/types';
 
 // Global cache to persist across component unmounts
@@ -30,6 +31,7 @@ export function useSubscription() {
   const { user } = useAuth();
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { setErrorMessage } = useError();
   const hasInitialized = useRef(false);
   const currentUserId = useRef<string | null>(null);
   const listenerRef = useRef<SubscriptionListener | null>(null);
@@ -115,7 +117,7 @@ export function useSubscription() {
         .single();
 
       if (error) {
-        console.error('Error fetching subscription:', error);
+        setErrorMessage(error.message || 'DEFAULT_ERROR');
         // Return cached data if available, even if stale
         if (cached && isComponentMounted.current) {
           setSubscriptionStatus(cached.data);
@@ -149,8 +151,8 @@ export function useSubscription() {
       }
       
       return status;
-    } catch (error) {
-      console.error('Error checking subscription:', error);
+    } catch (error: any) {
+      setErrorMessage(error.message || 'DEFAULT_ERROR');
       // Return cached data if available
       if (cached && isComponentMounted.current) {
         setSubscriptionStatus(cached.data);
@@ -178,7 +180,7 @@ export function useSubscription() {
           .eq('user_id', user.id);
 
         if (updateError) {
-          console.error('Error suspending subscription:', updateError);
+          setErrorMessage(updateError.message || 'DEFAULT_ERROR');
           return false;
         }
 
@@ -200,8 +202,8 @@ export function useSubscription() {
         emitSubscriptionUpdate(updatedStatus);
 
         return false;
-      } catch (error) {
-        console.error('Error suspending subscription:', error);
+      } catch (error: any) {
+        setErrorMessage(error.message || 'DEFAULT_ERROR');
         return false;
       }
     }
@@ -241,7 +243,7 @@ export function useSubscription() {
       if (updateError || typeof resultMessage !== 'string' || !resultMessage.startsWith('Success:')) {
         // If there's an RPC error OR the returned message indicates failure, we log and revert.
         const errorMessage = updateError ? updateError.message : resultMessage || 'Unknown error during credit deduction.';
-        console.error('Error updating credits:', errorMessage);
+        setErrorMessage(errorMessage);
 
         // Revert optimistic update on error
         const revertedStatus = { ...subscriptionStatus };
@@ -251,6 +253,7 @@ export function useSubscription() {
           expiresAt: Date.now() + CACHE_DURATION
         });
 
+        // Emit reverted status to all listeners
         emitSubscriptionUpdate(revertedStatus);
         return false;
       }
@@ -266,8 +269,8 @@ export function useSubscription() {
       }, 1000); // Small delay to allow DB to fully commit
 
       return true;
-    } catch (error) {
-      console.error('Error in credit transaction:', error);
+    } catch (error: any) {
+      setErrorMessage(error.message || 'DEFAULT_ERROR');
       
       // Revert optimistic update on error
       const revertedStatus = { ...subscriptionStatus };
@@ -277,6 +280,7 @@ export function useSubscription() {
         expiresAt: Date.now() + CACHE_DURATION
       });
       
+      // Emit reverted status to all listeners
       emitSubscriptionUpdate(revertedStatus);
       return false;
     }

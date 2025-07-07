@@ -3,6 +3,8 @@ import "@/app/globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/contexts/AuthContext"
+import { ErrorProvider } from "@/contexts/ErrorContext"
+import { ErrorModal } from "@/components/ui/ErrorModal"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -36,13 +38,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
-            <div className="min-h-screen bg-[#FDFCF5]">
-              {children}
-            </div>
+            <ErrorProvider>
+              <div className="min-h-screen bg-[#FDFCF5]">
+                {children}
+                <ErrorModal />
+              </div>
+            </ErrorProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

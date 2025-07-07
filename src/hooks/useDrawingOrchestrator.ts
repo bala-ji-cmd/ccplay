@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import useSound from 'use-sound';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useError } from '@/contexts/ErrorContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useDrawingState } from '@/hooks/useDrawingState';
 import { useCanvas } from '@/hooks/useCanvas';
@@ -20,18 +21,16 @@ export const useDrawingOrchestrator = () => {
     const { user } = useAuth();
     const router = useRouter();
     const { useCredits } = useSubscription();
+    const { setErrorMessage } = useError();
     const [playPop] = useSound('/sounds/pop.mp3', { volume: 0.5 });
 
     const {
         setGeneratedImage,
         setIsLoading,
-        setShowErrorModal,
-        setErrorMessage,
         setIsColorMode,
         setHasColorized,
         setDrawingName,
         setEditCount,
-        setIsEditingName,
         setIsInFinalState,
         setShowNewDrawingModal,
         setIsPrompting,
@@ -121,6 +120,8 @@ export const useDrawingOrchestrator = () => {
         }
     }, [state.drawingName, setDrawingName]);
 
+
+
     const saveCanvasState = (prompt?: string, type: 'drawn' | 'generated' | 'colorized' = 'drawn') => {
         const currentCanvas = canvasRef.current;
         if (!currentCanvas) return;
@@ -191,12 +192,10 @@ export const useDrawingOrchestrator = () => {
                     img.src = newImage;
                 });
             } else {
-                setErrorMessage(data.error);
-                setShowErrorModal(true);
+                setErrorMessage(data.error || 'DEFAULT_ERROR');
             }
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred.");
-            setShowErrorModal(true);
+            setErrorMessage(error instanceof Error ? error.message : "DEFAULT_ERROR");
         } finally {
             state.setIsColorizing(false);
             state.setIsColorizingAnimation(false);
@@ -231,9 +230,7 @@ export const useDrawingOrchestrator = () => {
             await performSave(imageDataUrl);
 
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred while saving your drawing.";
-            setWarningMessage(errorMessage);
-            setShowWarningModal(true);
+            setErrorMessage(error instanceof Error ? error.message : "DEFAULT_ERROR");
         } finally {
             setIsLoading(false);
         }
@@ -280,12 +277,10 @@ export const useDrawingOrchestrator = () => {
                     setIsInFinalState(true);
                 }
             } else {
-                setErrorMessage(data.error || 'Failed to generate image');
-                setShowErrorModal(true);
+                setErrorMessage(data.error || 'DEFAULT_ERROR');
             }
-        } catch (error: unknown) {
-            setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred.");
-            setShowErrorModal(true);
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : "DEFAULT_ERROR");
         } finally {
             setIsPrompting(false);
             setIsLoading(false);
@@ -306,9 +301,24 @@ export const useDrawingOrchestrator = () => {
             return;
         }
 
-        // Use the stored ID, removing the redundant and error-prone DB query.
-        setShareId(state.savedDrawingId);
-        setShowShareModal(true);
+        setIsLoading(true);
+        try {
+            const currentCanvas = canvasRef.current;
+            if (!currentCanvas) return;
+            
+            drawImageToCanvas(true, true);
+            const imageDataUrl = currentCanvas.toDataURL('image/png');
+
+            const drawingData = await performSave(imageDataUrl);
+            if (drawingData) {
+                setShareId(drawingData.id);
+                setShowShareModal(true);
+            }
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : "DEFAULT_ERROR");
+        } finally {
+            setIsLoading(false);
+        }
     };
     
     const resetCanvasState = () => {
@@ -333,7 +343,6 @@ export const useDrawingOrchestrator = () => {
         setHasColorized(false);
         setDrawingName(generateRandomName());
         setEditCount(0);
-        setIsEditingName(false);
         setIsSaved(false);
         if (canvasRef.current) {
             saveCanvasState();

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
-import { toast } from "sonner"
+import { useError } from "@/contexts/ErrorContext"
 import type { BedtimeStory } from "@/types"
 
 // Global cache for community stories
@@ -15,6 +15,7 @@ const STORIES_CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
 export const useCommunityStories = () => {
   const [communityStories, setCommunityStories] = useState<BedtimeStory[]>([])
   const [isFetching, setIsFetching] = useState(false)
+  const { setErrorMessage } = useError();
 
   const fetchCommunityStories = useCallback(async (forceRefresh = false) => {
     const now = Date.now();
@@ -52,9 +53,8 @@ export const useCommunityStories = () => {
       
       setCommunityStories(stories);
       return stories;
-    } catch (err) {
-      console.error("Error fetching community stories:", err)
-      toast.error("Failed to load community stories")
+    } catch (err: any) {
+      setErrorMessage(err.message || 'DEFAULT_ERROR');
       // Return cached data if available, even if stale
       if (storiesCache.data.length > 0) {
         setCommunityStories(storiesCache.data);

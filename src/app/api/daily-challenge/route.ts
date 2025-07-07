@@ -2,23 +2,8 @@ import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/ge
 import { NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
-
-// Helper function to validate the API key
-const validateApiKey = (apiKey: string): boolean => {
-  return apiKey.startsWith('AI') && apiKey.length > 20
-}
-
-// Helper function to get API key
-const getApiKey = (customApiKey?: string): string => {
-  const defaultKey = process.env.GEMINI_API_KEY
-  if (customApiKey && validateApiKey(customApiKey)) {
-    return customApiKey
-  }
-  if (!defaultKey) {
-    throw new Error('No valid API key provided')
-  }
-  return defaultKey
-}
+import { getApiKey, handleApiError } from '@/lib/ai'
+import logger from '@/lib/server-logger'
 
 // Helper function to parse filename and get date and deadline
 const parseFileName = (fileName: string): { date: string; deadline: string } | null => {
@@ -33,13 +18,19 @@ const generateFileName = (date: string, deadline: string): string => {
 }
 
 export async function GET(request: Request) {
+  logger.info('[daily-challenge] received GET request');
   try {
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date')
     const today = date || new Date().toISOString().split('T')[0]
+    logger.info({ today }, '[daily-challenge] target date determined');
 
     // Check if challenge already exists for today
     const publicDir = path.join(process.cwd(), 'public', 'contest')
+    if (!fs.existsSync(publicDir)) {
+      fs.mkdirSync(publicDir, { recursive: true });
+      logger.info(`[daily-challenge] created contest directory at ${publicDir}`);
+    }
     const files = fs.readdirSync(publicDir)
     
     // Find existing challenge for today
@@ -51,26 +42,17 @@ export async function GET(request: Request) {
     if (existingFile) {
       const parsed = parseFileName(existingFile)
       if (parsed) {
+        logger.info({ file: existingFile }, '[daily-challenge] found existing challenge');
         return NextResponse.json({
           sketch_url: `/contest/${existingFile}`,
           submission_deadline: parsed.deadline,
         })
       }
     }
+    logger.info('[daily-challenge] no existing challenge found, generating a new one');
 
     // Generate new challenge if it doesn't exist
-    let apiKey: string
-    try {
-      apiKey = getApiKey()
-    } catch (error) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'No API key available. Please provide a valid Gemini API key.',
-        },
-        { status: 400 }
-      )
-    }
+    const apiKey = getApiKey()
 
     const genAI = new GoogleGenerativeAI(apiKey)
 
@@ -110,14 +92,17 @@ The style should be whimsical and simple, allowing children to connect with the 
 
 Generate the only the image with the  ( 788 * 296 ) 16:9 aspect ratio to maintain quality. Don't respond with anything else but the image.`
 
-    console.log('[Daily Challenge] Calling LLM API...')
+    logger.info('[daily-challenge] calling LLM API...');
     const response = await model.generateContent(prompt)
-    console.log('[Daily Challenge] LLM API response received')
+    logger.info('[daily-challenge] LLM API response received');
     let imageData = null
 
     if (response.response.candidates && response.response.candidates[0].content.parts && response.response.candidates[0].content.parts[0].inlineData) {
       imageData = response.response.candidates[0].content.parts[0].inlineData.data
-      //console.log('[Daily Challenge] Daily contest image generated (size) :  ', imageData.length)
+      logger.info({ size: imageData.length }, '[daily-challenge] daily contest image generated');
+    } else {
+        logger.error('[daily-challenge] no image data received from AI');
+        throw new Error('No image data received from AI');
     }
 
     // Ensure directory exists
@@ -138,6 +123,7 @@ Generate the only the image with the  ( 788 * 296 ) 16:9 aspect ratio to maintai
     if (imageData) {
       const uint8Array = new Uint8Array(Buffer.from(imageData, 'base64'))
       fs.writeFileSync(filePath, uint8Array)
+      logger.info({ filePath }, '[daily-challenge] saved new challenge image');
     }
 
     return NextResponse.json({
@@ -145,32 +131,50 @@ Generate the only the image with the  ( 788 * 296 ) 16:9 aspect ratio to maintai
       submission_deadline: deadlineStr,
     })
   } catch (error) {
-    console.error('Error generating daily challenge:', error)
-    return NextResponse.json({ error: 'Failed to generate daily challenge' }, { status: 500 })
+    logger.error(error, '[daily-challenge] error in GET request');
+    if (error instanceof Error && error.message.includes('safety_settings')) {
+      return NextResponse.json(
+          {
+              success: false,
+              error: `This drawing idea isn't suitable for our creative space. Let's keep it fun, kid-friendly, and appropriate for all ages! 🎨✨`
+          },
+          { status: 400 }
+      );
+    }
+    return handleApiError(error);
   }
 }
 
 // Cleanup old images (older than 2 days)
 export async function DELETE() {
+  logger.info('[daily-challenge] received DELETE request for cleanup');
   try {
     const publicDir = path.join(process.cwd(), 'public', 'contest')
+    if (!fs.existsSync(publicDir)) {
+        logger.info('[daily-challenge] contest directory does not exist, nothing to clean up');
+        return NextResponse.json({ message: 'Cleanup completed, directory not found.' });
+    }
     const files = fs.readdirSync(publicDir)
 
     const twoDaysAgo = new Date()
     twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
 
+    let deletedCount = 0;
     for (const file of files) {
       const filePath = path.join(publicDir, file)
       const stats = fs.statSync(filePath)
 
       if (stats.mtime < twoDaysAgo) {
         fs.unlinkSync(filePath)
+        logger.info({ file: filePath }, '[daily-challenge] deleted old challenge image');
+        deletedCount++;
       }
     }
 
-    return NextResponse.json({ message: 'Cleanup completed' })
+    logger.info({ deletedCount }, '[daily-challenge] cleanup completed');
+    return NextResponse.json({ message: 'Cleanup completed', deleted_count: deletedCount })
   } catch (error) {
-    console.error('Error cleaning up old images:', error)
+    logger.error(error, '[daily-challenge] error cleaning up old images');
     return NextResponse.json({ error: 'Failed to cleanup old images' }, { status: 500 })
   }
 } 

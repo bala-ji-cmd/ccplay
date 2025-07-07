@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import logger from '@/lib/server-logger';
 
 import { supabase } from '@/lib/supabase';
 
@@ -42,11 +43,12 @@ const PLANS = {
 };
 
 export async function POST(req: Request) {
+  logger.info('[payments] received request');
   try {
     const { session, planId, isAnnual } = await req.json();
 
-    if (!session) {
-      //console.log('No session found')
+    if (!session || !session.user || !session.user.id) {
+      logger.warn('[payments] not authenticated');
       return NextResponse.json(
         { error: 'Not authenticated' },
         { status: 401 }
@@ -56,11 +58,13 @@ export async function POST(req: Request) {
     const plan = PLANS[planId as keyof typeof PLANS];
 
     if (!plan) {
+      logger.warn({ planId }, '[payments] invalid plan ID');
       return NextResponse.json(
         { error: 'Invalid plan' },
         { status: 400 }
       );
     }
+    logger.info({ planId, userId: session.user.id }, '[payments] creating checkout session');
 
     // Create Stripe checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
@@ -79,10 +83,11 @@ export async function POST(req: Request) {
       }
     });
 
+    logger.info({ checkoutUrl: checkoutSession.url }, '[payments] successfully created checkout session');
     return NextResponse.json({ checkoutUrl: checkoutSession.url });
 
   } catch (error) {
-    console.error('Payment error:', error);
+    logger.error(error, '[payments] payment error');
     return NextResponse.json(
       { error: 'Payment initialization failed' },
       { status: 500 }

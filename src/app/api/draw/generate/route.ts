@@ -1,32 +1,19 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI, GenerateContentResult, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
-import { GenerateRequest, GenerateResponse } from '@/types/api';
-
-// Helper function to validate the API key
-const validateApiKey = (apiKey: string): boolean => {
-  return apiKey.startsWith('AI') && apiKey.length > 20;
-};
-
-// Helper function to get API key
-const getApiKey = (customApiKey?: string): string => {
-  const defaultKey = process.env.GEMINI_API_KEY;
-  if (customApiKey && validateApiKey(customApiKey)) {
-    return customApiKey;
-  }
-  if (!defaultKey) {
-    throw new Error('No valid API key provided');
-  }
-  return defaultKey;
-};
-
+import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
+import { GenerateRequest } from '@/types/api';
+import { getApiKey, handleApiError } from '@/lib/ai';
+import logger from '@/lib/server-logger';
+import { getInitialSketchPrompt, getColorizePrompt, getRedrawPrompt } from '@/prompts/drawPrompts';
 
 export async function POST(request: Request) {
+  logger.info('[draw generate] received request');
   try {
     // Parse the request body
     const body = await request.json() as GenerateRequest;
     const { prompt, drawingData, customApiKey } = body;
 
     if (!prompt) {
+      logger.warn('[draw generate] prompt is required');
       return NextResponse.json(
         { success: false, error: 'Prompt is required' },
         { status: 400 }
@@ -34,18 +21,7 @@ export async function POST(request: Request) {
     }
 
     // Use custom API key if provided, otherwise use the one from environment variables
-    let apiKey: string;
-    try {
-      apiKey = getApiKey(customApiKey);
-    } catch (error) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'No API key available. Please provide a valid Gemini API key.'
-        },
-        { status: 400 }
-      );
-    }
+    const apiKey = getApiKey(customApiKey);
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
@@ -68,6 +44,7 @@ export async function POST(request: Request) {
     ],
     });
     let generationContent;
+    let isColorize = false;
 
     if (drawingData) {
       const imagePart = {
@@ -79,25 +56,29 @@ export async function POST(request: Request) {
 
       // Different prompt handling for colorize vs normal generation
       if (prompt.includes("[COLORIZE]")) {
+        isColorize = true;
+        logger.info('[draw generate] colorizing image');
         generationContent = [
           imagePart,
-          { text: `Apply bright and solid colors to this 1280 x 720 line drawing, filling it in like a children's coloring book. Use vibrant, cheerful colors suitable for children's illustrations. Each distinct element should have its own clear color. Avoid grayscale, maintaining the original black line work while adding solid, clean colors between the lines.` }
+          { text: getColorizePrompt() }
         ];
       } else {
         // Regular black and white sketch generation
+        logger.info('[draw generate] generating from existing drawing');
         generationContent = [
           imagePart,
-          { text: `${prompt}. Keep a 1280 x 720 canvas (16:9 aspect ratio) with a minimal line doodle style. Ensure clean, bold strokes with sharp edges, avoiding any blurring or feathering. The lines should be well-defined and suitable for a children's drawing.` }
+          { text: getRedrawPrompt(prompt) }
         ];
       }
     } else {
       // Initial sketch creation
-      generationContent = `${prompt}. Create a black and white hand-drawn sketch on a 1280 x 720 canvas (16:9 aspect ratio). Use thick, bold strokes similar to a heavy marker or ink pen. Ensure the lines are sharp, solid, and well-defined with no blurring, feathering, or shading—just clean black outlines on a white background`;
+      logger.info('[draw generate] creating initial sketch');
+      generationContent = getInitialSketchPrompt(prompt);
     }
 
-    console.log("Calling LLM API...");
+    logger.info({ isColorize: isColorize, prompt: prompt }, "[draw generate] calling AI API");
     const response = await model.generateContent(generationContent);
-    console.log("LLM API response received");
+    logger.info("[draw generate] AI API response received");
 
     // Initialize response data
     const result = {
@@ -108,9 +89,9 @@ export async function POST(request: Request) {
 
     // Process response parts
     if (!response.response?.candidates?.[0]?.content?.parts) {
-      console.error("No response parts received from Gemini API");
+      logger.error("[draw generate] no response parts received from AI API");
       return NextResponse.json(
-        { success: false, error: 'No response received from Gemini API' },
+        { success: false, error: 'No response received from AI API' },
         { status: 500 }
       );
     }
@@ -119,10 +100,10 @@ export async function POST(request: Request) {
       // Based on the part type, either get the text or image data
       if (part.text) {
         result.message = part.text;
-        console.log("Received text response:", part.text);
+        logger.debug({ text: part.text}, "[draw generate] received text response");
       } else if (part.inlineData) {
         const imageData = part.inlineData.data;
-        console.log("Received image data, length:", imageData.length);
+        logger.debug({ length: imageData.length}, "[draw generate] received image data");
 
         // Include the base64 data in the response
         result.imageData = imageData;
@@ -130,7 +111,7 @@ export async function POST(request: Request) {
     }
 
     if (!result.imageData) {
-      console.error("No image data received in response");
+      logger.error("[draw generate] no image data received in response");
       return NextResponse.json(
         { success: false, error: 'No image was generated' },
         { status: 500 }
@@ -139,11 +120,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result);
 
-  } catch (error) {
-    console.error("Error generating content:", error);
-
+  } catch (error: any) {
+    logger.error(error, "[draw generate] error");
     // Check if the error is related to safety/content filtering
-    if (error instanceof Error && error.message.includes('safety_settings')) {
+    if (error.message && error.message.includes('safety_settings')) {
       return NextResponse.json(
           {
               success: false,
@@ -153,14 +133,17 @@ export async function POST(request: Request) {
       );
     }
 
-    // More detailed error response
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to generate image',
-        details: error instanceof Error ? error.stack : undefined
-      },
-      { status: 500 }
-    );
+    if (error.status === 429) {
+        const kidsCount = Math.floor(Math.random() * (15 - 5 + 1)) + 5;
+        return NextResponse.json(
+            {
+                success: false,
+                error: `${kidsCount} other kids are drawing right now, which is causing a bit of a jam. Please try again in a moment! 🎨`,
+            },
+            { status: 429 }
+        );
+    }
+    
+    return handleApiError(error);
   }
 }

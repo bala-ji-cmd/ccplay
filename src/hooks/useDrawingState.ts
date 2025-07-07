@@ -12,8 +12,6 @@ export const useDrawingState = () => {
     const [prompt, setPrompt] = useState<string>("");
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [showErrorModal, setShowErrorModal] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
     const [customApiKey, setCustomApiKey] = useState("");
     const [showShareModal, setShowShareModal] = useState(false);
     const [isFirstVisit, setIsFirstVisit] = useState(true);
@@ -26,7 +24,7 @@ export const useDrawingState = () => {
     const [drawingName, setDrawingName] = useState('');
     const [editCount, setEditCount] = useState(0);
     const [maxEdits] = useState(5);
-    const [isEditingName, setIsEditingName] = useState(false);
+
     const [isInFinalState, setIsInFinalState] = useState(false);
     const [showNewDrawingModal, setShowNewDrawingModal] = useState(false);
     const [isPrompting, setIsPrompting] = useState(false);
@@ -39,13 +37,12 @@ export const useDrawingState = () => {
     const [shareId, setShareId] = useState<string | null>(null);
     const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
     const [savedDrawingId, setSavedDrawingId] = useState<string | null>(null);
+    const [showEditNameModal, setShowEditNameModal] = useState(false);
 
     return {
         prompt, setPrompt,
         generatedImage, setGeneratedImage,
         isLoading, setIsLoading,
-        showErrorModal, setShowErrorModal,
-        errorMessage, setErrorMessage,
         customApiKey, setCustomApiKey,
         showShareModal, setShowShareModal,
         isFirstVisit, setIsFirstVisit,
@@ -58,7 +55,7 @@ export const useDrawingState = () => {
         drawingName, setDrawingName,
         editCount, setEditCount,
         maxEdits,
-        isEditingName, setIsEditingName,
+
         isInFinalState, setIsInFinalState,
         showNewDrawingModal, setShowNewDrawingModal,
         isPrompting, setIsPrompting,
@@ -71,5 +68,6 @@ export const useDrawingState = () => {
         shareId, setShareId,
         showSubscriptionModal, setShowSubscriptionModal,
         savedDrawingId, setSavedDrawingId,
+        showEditNameModal, setShowEditNameModal,
     };
 }; 

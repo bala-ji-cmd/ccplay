@@ -38,15 +38,7 @@ export const ErrorModal = ({ initialApiKey, onClose, onSubmit }: ErrorModalProps
 
         <form onSubmit={handleSubmit}>
           <label className="block text-sm font-medium text-[#4B4B4B] mb-2">
-            Add your own Gemini API key from{" "}
-            <a
-              href="https://ai.google.dev/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#1CB0F6] hover:underline"
-            >
-              Google AI Studio
-            </a>
+            Add your own API key to continue generating.
           </label>
           <input
             type="text"

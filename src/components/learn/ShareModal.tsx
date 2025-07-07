@@ -93,7 +93,7 @@ export const ShareModal = ({ isOpen, onClose, shareId }: ShareModalProps) => {
           
           <button
             onClick={onClose}
-            className="w-full p-2 border-2 border-[#E5E5E5] rounded-xl hover:bg-[#F7F7F7] font-bold"
+            className="w-full p-2 bg-[#FF4B4B] text-white rounded-xl hover:bg-red-600 font-bold border-b-2 border-red-700"
           >
             Close
           </button>

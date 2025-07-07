@@ -140,7 +140,7 @@ const featuredDrawings: FeaturedDrawing[] = [
     imagePath: "/drawings/Herd of Sheep Cocomelon Play.png",
     title: "Herd of Sheep",
     description: "A peaceful meadow scene with a herd of sheep grazing under blue skies.",
-  kidName: "Sophie",
+    kidName: "Sophie",
     kidAge: 5,
     backgroundColor: "#FFF9E5",
     borderColor: "#FFC800",
@@ -160,7 +160,7 @@ const featuredDrawings: FeaturedDrawing[] = [
   }
 ]
 
-const DrawingCard = ({ drawing }: { drawing: FeaturedDrawing }) => {
+const DrawingCard = ({ drawing, priority }: { drawing: FeaturedDrawing, priority?: boolean }) => {
   const getIcon = () => {
     if (drawing.icon.type === 'image') {
       return (
@@ -169,6 +169,8 @@ const DrawingCard = ({ drawing }: { drawing: FeaturedDrawing }) => {
           alt={drawing.title} 
           width={30} 
           height={30} 
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          priority={priority}
         />
       )
     }
@@ -256,7 +258,14 @@ const DrawingCard = ({ drawing }: { drawing: FeaturedDrawing }) => {
         style={{ borderColor: drawing.borderColor }}
       >
         <div className="relative h-48">
-          <Image src={drawing.imagePath} alt={drawing.title} fill className="object-cover" />
+          <Image
+            src={drawing.imagePath}
+            alt={drawing.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={priority}
+          />
           <div className="absolute top-3 right-3">
             <div
               className="rounded-full h-10 w-10 flex items-center justify-center border-2"
@@ -339,7 +348,7 @@ export function FeaturedDrawings() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {featuredDrawings.map((drawing, index) => (
-            <DrawingCard key={index} drawing={drawing} />
+            <DrawingCard key={index} drawing={drawing} priority={index === 0} />
           ))}
         </div>
 

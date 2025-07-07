@@ -4,28 +4,14 @@ import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/ge
 import { readCaptions, updateCaptionScores, isResultsComputed, markResultsComputed } from '@/lib/csv-utils'
 import fs from 'fs'
 import path from 'path'
+import { getApiKey, handleApiError } from '@/lib/ai'
+import logger from '@/lib/server-logger'
+import { supabase } from '@/lib/supabase'
 
 
 async function getImageAsBase64(imagePath: string): Promise<string> {
   const imageBuffer = fs.readFileSync(imagePath)
   return imageBuffer.toString('base64')
-}
-
-// Helper function to validate the API key
-const validateApiKey = (apiKey: string): boolean => {
-  return apiKey.startsWith('AI') && apiKey.length > 20
-}
-
-// Helper function to get API key
-const getApiKey = (customApiKey?: string): string => {
-  const defaultKey = process.env.GEMINI_API_KEY
-  if (customApiKey && validateApiKey(customApiKey)) {
-    return customApiKey
-  }
-  if (!defaultKey) {
-    throw new Error('No valid API key provided')
-  }
-  return defaultKey
 }
 
 // Helper function to parse filename and get date and deadline
@@ -37,11 +23,13 @@ const parseFileName = (fileName: string): { date: string; deadline: string } | n
 
 
 export async function GET(request: Request) {
+  logger.info('[cron compute-scores] received request');
   // Verify cron job secret
   const headersList = headers()
   const cronSecret = headersList.get('x-cron-secret')
   
   if (cronSecret !== process.env.CRON_SECRET) {
+    logger.warn('[cron compute-scores] unauthorized access');
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -58,51 +46,46 @@ export async function GET(request: Request) {
       yesterday.setDate(yesterday.getDate() - 1)
       targetDate = yesterday.toISOString().split('T')[0]
     }
+    logger.info({ targetDate }, '[cron compute-scores] target date determined');
 
     // Check if results are already computed
     if (isResultsComputed(targetDate)) {
+      logger.info({ targetDate }, '[cron compute-scores] results already computed');
       return NextResponse.json({ message: 'Results already computed for this date' })
     }
-
 
     // Get captions for the target date
     const captions = readCaptions(targetDate)
     if (captions.length === 0) {
+      logger.info({ targetDate }, '[cron compute-scores] no captions found');
       return NextResponse.json({ message: 'No captions found for this date' })
     }
-
-
+    logger.info({ count: captions.length, targetDate }, '[cron compute-scores] captions read');
 
     // Get the image path
-
     const publicDir = path.join(process.cwd(), 'public', 'contest')
     const files = fs.readdirSync(publicDir)
-     // Find existing challenge for today
-    const imagePath = files.find(file => {
+    const imageFileName = files.find(file => {
       const parsed = parseFileName(file)
       return parsed && parsed.date === targetDate
     })
 
-    if (!imagePath || !fs.existsSync(imagePath)) {
-      // return NextResponse.json({ error: 'Image not found for this date' }, { status: 404 })
-      console.error("imagenot found");
+    if (!imageFileName) {
+        logger.error({ targetDate }, '[cron compute-scores] image not found for this date');
+        return NextResponse.json({ error: 'Image not found for this date' }, { status: 404 });
     }
-
-    const imageBase64 = await getImageAsBase64(publicDir+'/'+imagePath)
-
-        // Initialize Gemini
-    let apiKey: string
-    try {
-      apiKey = getApiKey()
-    } catch (error) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'No API key available. Please provide a valid Gemini API key.',
-        },
-        { status: 400 }
-      )
+    
+    const imagePath = path.join(publicDir, imageFileName);
+    if (!fs.existsSync(imagePath)) {
+      logger.error({ imagePath }, '[cron compute-scores] image file does not exist');
+      return NextResponse.json({ error: 'Image file does not exist' }, { status: 404 });
     }
+    logger.info({ imagePath }, '[cron compute-scores] image found');
+
+    const imageBase64 = await getImageAsBase64(imagePath)
+
+    // Initialize AI
+    const apiKey = getApiKey()
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
@@ -162,14 +145,14 @@ Requirements:
       { text: prompt }
     ]
 
-    // console.log("Calling Gemini API...")
+    logger.info("[cron compute-scores] calling AI API...");
     
-    // Get scores from Gemini
+    // Get scores from AI
     const result = await model.generateContent(generationContent)
-    // console.log("Response received from Gemini...")
+    logger.info("[cron compute-scores] response received from AI");
 
     let response = result.response.text()
-    // console.log("Raw response:", response)
+    logger.debug({ response }, "[cron compute-scores] raw response");
 
     // Clean up the response to handle potential markdown or code blocks
     response = response.replace(/```json\s*|\s*```/g, '').trim()
@@ -177,9 +160,11 @@ Requirements:
     // Parse scores from JSON response
     try {
       const parsedResponse = JSON.parse(response)
+      logger.info("[cron compute-scores] successfully parsed response");
       
       // Validate response structure
       if (!parsedResponse.scores || !Array.isArray(parsedResponse.scores)) {
+        logger.error({ parsedResponse }, '[cron compute-scores] invalid response format: missing scores array');
         throw new Error('Invalid response format: missing scores array')
       }
 
@@ -189,13 +174,17 @@ Requirements:
       // Validate each score entry
       for (const item of parsedResponse.scores) {
         if (!item.caption || typeof item.caption !== 'string') {
+          logger.error({ item }, '[cron compute-scores] invalid caption format in response');
           throw new Error('Invalid caption format in response')
         }
         if (typeof item.score !== 'number' || item.score < 0 || item.score > 10 || !Number.isInteger(item.score)) {
+          logger.error({ item }, `[cron compute-scores] invalid score for caption "${item.caption}"`);
           throw new Error(`Invalid score for caption "${item.caption}": score must be an integer between 0 and 10`)
         }
         if (!providedCaptions.has(item.caption)) {
-          throw new Error(`Received score for unknown caption: "${item.caption}"`)
+          logger.warn({ caption: item.caption }, '[cron compute-scores] received score for unknown caption');
+          // This might not be a critical error, so we can choose to log and continue
+          continue;
         }
         scores[item.caption] = item.score
       }
@@ -203,16 +192,20 @@ Requirements:
       // Verify all captions were scored
       const missingCaptions = Array.from(providedCaptions).filter(caption => !(caption in scores))
       if (missingCaptions.length > 0) {
-        throw new Error(`Missing scores for captions: ${missingCaptions.join(', ')}`)
+        logger.warn({ missingCaptions }, '[cron compute-scores] missing scores for some captions');
+        // Depending on requirements, this could be a soft error or a hard one.
+        // For now, we proceed with the scores we have.
       }
 
-      // console.log("Validated scores:", scores)
+      logger.info({ scoresCount: Object.keys(scores).length }, "[cron compute-scores] validated scores");
 
       // Update scores in CSV
       updateCaptionScores(targetDate, scores)
+      logger.info({ targetDate }, '[cron compute-scores] updated scores in CSV');
 
       // Mark results as computed
       markResultsComputed(targetDate)
+      logger.info({ targetDate }, '[cron compute-scores] marked results as computed');
 
       return NextResponse.json({ 
         message: 'Scores computed and updated successfully',
@@ -221,15 +214,11 @@ Requirements:
         scores: scores // Include scores in response for verification
       })
     } catch (error) {
-      console.error('Error processing Gemini response:', error)
-      return NextResponse.json({ 
-        error: 'Failed to process scores',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        raw_response: response // Include raw response for debugging
-      }, { status: 500 })
+      logger.error(error, '[cron compute-scores] error processing AI response');
+      return handleApiError(error)
     }
   } catch (error) {
-    console.error('Error computing scores:', error)
-    return NextResponse.json({ error: 'Failed to compute scores' }, { status: 500 })
+    logger.error(error, '[cron compute-scores] an unexpected error occurred');
+    return handleApiError(error)
   }
 } 

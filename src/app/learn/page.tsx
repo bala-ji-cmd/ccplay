@@ -10,8 +10,8 @@ import { motion } from "framer-motion";
 import { Download, Share2 } from 'lucide-react';
 import { Loader } from "@/components/ui/loader";
 import { useLearnDrawing } from "@/hooks/useLearnDrawing";
-import { ShareModal } from "@/components/learn/ShareModal";
-import { DownloadModal } from "@/components/learn/DownloadModal";
+import { LoadingOverlay } from "@/components/story/LoadingOverlay";
+import { UnifiedModal } from "@/components/ui/UnifiedModal";
 
 export default function LearnPage() {
     const {
@@ -21,8 +21,6 @@ export default function LearnPage() {
         isGenerating,
         isDownloading,
         shareId,
-        error,
-        setError,
         handlePromptSubmit,
         handleSave,
         handleShare,
@@ -53,6 +51,8 @@ export default function LearnPage() {
         setShowDownloadModal(false);
     };
 
+    const shareUrl = shareId ? `${window.location.origin}/share/learn/${shareId}` : '';
+
     return (
         <div className="min-h-screen bg-[#FFF9E5] p-4">
             {showSubscriptionModal && (
@@ -62,37 +62,29 @@ export default function LearnPage() {
                 />
             )}
 
-            {error && (
-                <WarningModal
-                    isOpen={!!error}
-                    onClose={() => setError(null)}
-                    message={error}
-                />
-            )}
-
-            {isGenerating && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="fixed inset-0 bg-white/50 flex items-center justify-center z-50"
-                >
-                    <Loader size="lg" />
-                </motion.div>
-            )}
-
-            <ShareModal 
-                isOpen={showShareModal}
-                onClose={() => setShowShareModal(false)}
-                shareId={shareId}
+            <LoadingOverlay 
+                isVisible={isGenerating} 
+                message="Creating your drawing steps... We're generating 6 step-by-step images for you! 🎨"
             />
 
-            <DownloadModal
+            <UnifiedModal
+                isOpen={showShareModal}
+                onClose={() => setShowShareModal(false)}
+                type="share"
+                title="Share your creation"
+                shareUrl={shareUrl}
+                shareText="Check out my drawing steps!"
+            />
+
+            <UnifiedModal
                 isOpen={showDownloadModal}
                 onClose={() => setShowDownloadModal(false)}
-                onSubmit={onProcessDownload}
-                isDownloading={isDownloading}
+                type="download"
+                title="Save your artwork"
                 fileName={downloadFileName}
                 onFileNameChange={setDownloadFileName}
+                onSubmit={onProcessDownload}
+                isDownloading={isDownloading}
             />
 
             <motion.div
