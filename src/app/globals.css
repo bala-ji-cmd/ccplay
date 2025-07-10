@@ -175,6 +175,21 @@
     font-family: 'Fredoka', sans-serif;
     color: #1a1a1a;
   }
+
+  html {
+    cursor: url(/cursors/pizza.png), auto;
+  }
+
+  a,
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="button"],
+  select,
+  [tabindex]:not([tabindex="-1"]) {
+    cursor: url(/cursors/pointer.png), pointer;
+  }
 }
 
 /* Custom animations */

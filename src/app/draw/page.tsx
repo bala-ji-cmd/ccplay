@@ -17,6 +17,7 @@ import { EditNameModal } from "@/components/drawing/modals/EditNameModal";
 import { VersionHistory } from "@/components/drawing/VersionHistory";
 import { HowItWorks } from "@/components/drawing/HowItWorks";
 import { useDrawingOrchestrator } from "@/hooks/useDrawingOrchestrator";
+import { VoiceMicrophoneButton } from "@/components/ui/VoiceMicrophoneButton";
 
 export default function DrawPage() {
   const {
@@ -63,6 +64,7 @@ export default function DrawPage() {
     clearCanvas,
     resetCanvasState,
     saveCanvasState,
+    voiceRecording,
   } = useDrawingOrchestrator();
 
   const { subscriptionStatus } = useSubscription();
@@ -347,42 +349,126 @@ export default function DrawPage() {
                 )}
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {!isInFinalState && !hasColorized && editCount < maxEdits && (
-                  <div className="relative w-full max-w-3xl mx-auto">
+                  <div className="relative w-full max-w-3xl mx-auto mb-8">
                     <form onSubmit={handleSubmit} className="relative">
-                      <input
-                        type="text"
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        placeholder={hasCanvasContent ? "What should we add next?" : "Add your change..."}
-                        className="w-full px-4 py-3 pr-12 rounded-full border-4 border-[#58CC02] focus:border-[#46A302] focus:outline-none shadow-md"
-                        style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
-                        required
-                        disabled={isLoading}
-                      />
-                      <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#58CC02] hover:text-[#46A302] disabled:text-[#A9D98F]"
-                      >
-                        {isLoading ? (
-                          <div className="flex gap-1">
-                            <div className="w-1.5 h-1.5 bg-[#58CC02] rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
-                            <div className="w-1.5 h-1.5 bg-[#58CC02] rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                            <div className="w-1.5 h-1.5 bg-[#58CC02] rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
-                          </div>
-                        ) : (
-                          <SendHorizontal className="w-5 h-5" />
-                        )}
-                      </button>
+                      {/* Desktop Layout - Horizontal */}
+                      <div className="hidden sm:flex items-center gap-3 pb-4">
+                        {/* Voice Recording Button */}
+                        <div className="flex-shrink-0">
+                          <VoiceMicrophoneButton
+                            recording={voiceRecording.recording}
+                            processing={voiceRecording.processing}
+                            error={voiceRecording.error}
+                            audioLevel={voiceRecording.audioLevel}
+                            duration={voiceRecording.duration}
+                            maxDuration={30}
+                            processingStage={voiceRecording.processingStage}
+                            onStartRecording={voiceRecording.onStartRecording}
+                            onStopRecording={voiceRecording.onStopRecording}
+                            disabled={isLoading}
+                            className="relative"
+                          />
+                        </div>
+
+                        {/* Text Input + Send Button (WhatsApp style) */}
+                        <div className="flex-1 flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            placeholder={
+                              voiceRecording.recording 
+                                ? "🎤 Listening..." 
+                                : voiceRecording.processing 
+                                ? "✨ Processing..." 
+                                : hasCanvasContent 
+                                ? "What should we add next?" 
+                                : "Tell me what to draw..."
+                            }
+                            className={`w-full px-4 py-3 rounded-full border-4 focus:outline-none shadow-md transition-all duration-300 text-[#4B4B4B] ${
+                              voiceRecording.recording 
+                                ? "border-[#FF4B4B] bg-red-50" 
+                                : voiceRecording.processing 
+                                ? "border-[#FFD900] bg-yellow-50" 
+                                : "border-[#58CC02] focus:border-[#46A302] bg-[#FFF9E5]"
+                            }`}
+                            style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+                            required
+                            disabled={isLoading || voiceRecording.recording}
+                          />
+                          <button
+                            type="submit"
+                            disabled={isLoading || voiceRecording.recording}
+                            className="ml-2 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-[#58CC02] to-[#46A302] hover:from-[#46A302] hover:to-[#378700] text-white shadow-lg border-4 border-[#58CC02] hover:border-[#46A302] transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-green-300/50 text-2xl"
+                            aria-label="Send prompt"
+                          >
+                            <SendHorizontal className="w-7 h-7" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Mobile Layout - Vertical */}
+                      <div className="sm:hidden flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            placeholder={
+                              voiceRecording.recording 
+                                ? "🎤 Listening..." 
+                                : voiceRecording.processing 
+                                ? "✨ Processing..." 
+                                : hasCanvasContent 
+                                ? "What should we add next?" 
+                                : "Tell me what to draw..."
+                            }
+                            className={`flex-1 px-4 py-3 rounded-full border-4 focus:outline-none shadow-md transition-all duration-300 text-[#4B4B4B] ${
+                              voiceRecording.recording 
+                                ? "border-[#FF4B4B] bg-red-50" 
+                                : voiceRecording.processing 
+                                ? "border-[#FFD900] bg-yellow-50" 
+                                : "border-[#58CC02] focus:border-[#46A302] bg-[#FFF9E5]"
+                            }`}
+                            style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+                            required
+                            disabled={isLoading || voiceRecording.recording}
+                          />
+                          <button
+                            type="submit"
+                            disabled={isLoading || voiceRecording.recording}
+                            className="ml-2 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-[#58CC02] to-[#46A302] hover:from-[#46A302] hover:to-[#378700] text-white shadow-lg border-4 border-[#58CC02] hover:border-[#46A302] transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-green-300/50 text-2xl"
+                            aria-label="Send prompt"
+                          >
+                            <SendHorizontal className="w-7 h-7" />
+                          </button>
+                        </div>
+                        {/* Voice Recording Button - Centered with enhanced spacing */}
+                        <div className="flex justify-center pt-2 pb-4">
+                          <VoiceMicrophoneButton
+                            recording={voiceRecording.recording}
+                            processing={voiceRecording.processing}
+                            error={voiceRecording.error}
+                            audioLevel={voiceRecording.audioLevel}
+                            duration={voiceRecording.duration}
+                            maxDuration={30}
+                            processingStage={voiceRecording.processingStage}
+                            onStartRecording={voiceRecording.onStartRecording}
+                            onStopRecording={voiceRecording.onStopRecording}
+                            disabled={isLoading}
+                            className="relative"
+                          />
+                        </div>
+                      </div>
                     </form>
                   </div>
                 )}
 
                 {hasCanvasContent && (
                   <motion.div
-                    className="flex justify-center gap-4"
+                    className="flex justify-center gap-4 mt-6 pt-4 border-t-2 border-dashed border-[#FFD900]/30"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}

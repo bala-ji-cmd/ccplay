@@ -4,7 +4,6 @@ import fs from 'fs';
 import path from 'path';
 import { writeFile } from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
-import os from 'os';
 import logger from '@/lib/server-logger';
 
 const openai = new OpenAI();
@@ -34,11 +33,21 @@ async function transcribeAudio(filePath: string) {
 
 export async function POST(request: NextRequest) {
   logger.info('[transcribe] received request');
-  const tempDir = os.tmpdir();
+  
+  // Use internal project folder for temp files (consistent with voice-prompt)
+  const tempDir = path.join(process.cwd(), 'temp', 'transcribe');
   const fileName = `voice-${uuidv4()}.webm`;
-  const filePath = path.join(tempDir, fileName);
+  let filePath: string | null = null;
 
   try {
+    // Ensure temp directory exists
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+      logger.info({ tempDir }, '[transcribe] created temp directory');
+    }
+
+    filePath = path.join(tempDir, fileName);
+
     const formData = await request.formData();
     const audioFile = formData.get('audio') as File;
     
@@ -59,7 +68,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ text: transcription });
     } finally {
       // Clean up temp file
-      if (fs.existsSync(filePath)) {
+      if (filePath && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
         logger.info({ filePath }, '[transcribe] cleaned up temp audio file');
       }
@@ -67,7 +76,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logger.error(error, '[transcribe] transcription error');
     // Clean up temp file in case of error
-    if (fs.existsSync(filePath)) {
+    if (filePath && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
         logger.info({ filePath }, '[transcribe] cleaned up temp audio file after error');
     }

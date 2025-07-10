@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useRouter } from 'next/navigation';
 import useSound from 'use-sound';
 import { supabase } from '@/lib/supabase';
@@ -9,6 +9,7 @@ import { useError } from '@/contexts/ErrorContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useDrawingState } from '@/hooks/useDrawingState';
 import { useCanvas } from '@/hooks/useCanvas';
+import { useVoiceRecording } from '@/hooks/useVoiceRecording';
 import { generateRandomName, fireConfetti, dataURLtoFile } from "@/lib/utils";
 
 // We need to import the actual confetti library to use it here. Let's assume it is globally available or imported elsewhere.
@@ -23,6 +24,12 @@ export const useDrawingOrchestrator = () => {
     const { useCredits } = useSubscription();
     const { setErrorMessage } = useError();
     const [playPop] = useSound('/sounds/pop.mp3', { volume: 0.5 });
+
+    // Voice recording integration
+    const voiceRecording = useVoiceRecording();
+    
+    // Ref to track processed audioBlob to prevent infinite loop
+    const processedAudioBlobRef = useRef<Blob | null>(null);
 
     const {
         setGeneratedImage,
@@ -120,7 +127,104 @@ export const useDrawingOrchestrator = () => {
         }
     }, [state.drawingName, setDrawingName]);
 
+    // Voice recording handlers
+    const handleVoiceStart = async () => {
+        if (!voiceRecording.isSupported) {
+            setErrorMessage('Voice recording is not supported on this device.');
+            return;
+        }
 
+        try {
+            // Reset processed audioBlob reference when starting new recording
+            processedAudioBlobRef.current = null;
+            playPop(); // Play sound feedback
+            await voiceRecording.startRecording({
+                silenceThreshold: 15,
+                silenceTimeout: 3000, // 3 seconds for drawing prompts
+                maxRecordingTime: 30000, // 30 seconds max
+                enableSilenceDetection: true
+            });
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to start voice recording.');
+        }
+    };
+
+    const handleVoiceStop = () => {
+        playPop(); // Play sound feedback
+        voiceRecording.stopRecording();
+    };
+
+    const handleVoiceTranscription = useCallback(async (audioBlob: Blob) => {
+        if (!audioBlob) return;
+
+        voiceRecording.setProcessing(true);
+        
+        // Progressive processing stages for better UX
+        const stages = ['uploading', 'analyzing', 'transcribing', 'finalizing'] as const;
+        let currentStageIndex = 0;
+        
+        // Set initial stage
+        voiceRecording.setProcessingStage(stages[currentStageIndex]);
+        
+        // Update processing stage every 800ms to show progress
+        const stageInterval = setInterval(() => {
+            if (currentStageIndex < stages.length - 1) {
+                currentStageIndex++;
+                voiceRecording.setProcessingStage(stages[currentStageIndex]);
+            }
+        }, 800);
+        
+        try {
+            // Create FormData for the API call
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'voice-prompt.webm');
+            if (state.customApiKey) {
+                formData.append('customApiKey', state.customApiKey);
+            }
+
+            const response = await fetch('/api/voice-prompt', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.data?.text) {
+                // Update the prompt with transcribed text
+                setPrompt(data.data.text);
+                voiceRecording.setTranscribedText(data.data.text);
+                playPop(); // Success sound
+            } else {
+                throw new Error(data.error || 'Failed to transcribe voice');
+            }
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'Failed to process voice recording.');
+        } finally {
+            clearInterval(stageInterval);
+            voiceRecording.setProcessing(false);
+            voiceRecording.setProcessingStage(null);
+        }
+    }, [voiceRecording, state.customApiKey, setPrompt, setErrorMessage, playPop]);
+
+    // Monitor voice recording completion - using ref to prevent infinite loop
+    useEffect(() => {
+        if (voiceRecording.audioBlob && 
+            !voiceRecording.recording && 
+            !voiceRecording.processing && 
+            voiceRecording.audioBlob !== processedAudioBlobRef.current) {
+            
+            // Mark this audioBlob as processed to prevent re-processing
+            processedAudioBlobRef.current = voiceRecording.audioBlob;
+            handleVoiceTranscription(voiceRecording.audioBlob);
+        }
+    }, [voiceRecording.audioBlob, voiceRecording.recording, voiceRecording.processing, handleVoiceTranscription]);
+
+    // Also reset the processed audioBlob reference when voice recording is cleared
+    useEffect(() => {
+        if (!voiceRecording.audioBlob) {
+            processedAudioBlobRef.current = null;
+        }
+    }, [voiceRecording.audioBlob]);
 
     const saveCanvasState = (prompt?: string, type: 'drawn' | 'generated' | 'colorized' = 'drawn') => {
         const currentCanvas = canvasRef.current;
@@ -407,6 +511,14 @@ export const useDrawingOrchestrator = () => {
         ...state,
         ...canvas,
         playPop,
+        
+        // Voice recording state and actions
+        voiceRecording: {
+            ...voiceRecording,
+            onStartRecording: handleVoiceStart,
+            onStopRecording: handleVoiceStop,
+        },
+        
         // Actions
         handleSubmit,
         handleColorize,
