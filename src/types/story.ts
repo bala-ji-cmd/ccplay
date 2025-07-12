@@ -7,6 +7,7 @@ export type BedtimeStory = {
   moral: string
   banner_image_description: string
   banner_image: string
+  audiopath?: string | null // Public URL to audio file in Supabase storage
   created_at: string
   updated_at: string
 } 

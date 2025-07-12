@@ -10,6 +10,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@breezystack/lamejs": "^1.2.7",
+    "@google-cloud/text-to-speech": "^6.2.0",
     "@google/generative-ai": "^0.24.0",
     "@radix-ui/react-progress": "^1.1.2",
     "@radix-ui/react-select": "^2.0.0",

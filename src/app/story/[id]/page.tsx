@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
-import { BookOpen, ChevronLeft, Sparkles } from "lucide-react"
+import { BookOpen, ChevronLeft, Sparkles, Volume2 } from "lucide-react"
+import { StoryAudioPlayer, AnimalCharacterSelector } from "@/components/story"
+import { useStoryNarration } from "@/hooks/useStoryNarration"
+import { useCharacterPreferences } from "@/hooks/useCharacterPreferences"
 
 export default function StoryDetailPage({
   params,
@@ -18,6 +21,11 @@ export default function StoryDetailPage({
   const [story, setStory] = useState<BedtimeStory | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showNarrationSection, setShowNarrationSection] = useState(false)
+  
+  // Character preferences and narration hooks
+  const { selectedCharacterId, selectCharacter, isLoading: characterLoading } = useCharacterPreferences()
+  const { generateNarration, hasAudio, ...narrationState } = useStoryNarration()
 
   useEffect(() => {
     async function fetchStory() {
@@ -36,6 +44,25 @@ export default function StoryDetailPage({
 
     fetchStory()
   }, [params.id])
+
+  // Handle character selection and narration generation
+  const handleCharacterSelect = async (characterId: string) => {
+    selectCharacter(characterId)
+    if (story?.story) {
+      await generateNarration(story.story, { characterId })
+    }
+  }
+
+  // Handle narration generation with selected character
+  const handleGenerateNarration = async () => {
+    if (!selectedCharacterId || !story?.story) return
+    await generateNarration(story.story, { characterId: selectedCharacterId })
+  }
+
+  // Toggle narration section visibility
+  const handleToggleNarration = () => {
+    setShowNarrationSection(!showNarrationSection)
+  }
 
   if (loading) {
     return (
@@ -160,6 +187,80 @@ export default function StoryDetailPage({
                 >
                   {story.moral}
                 </p>
+              </div>
+
+              {/* Narration Section */}
+              <div className="mt-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 
+                    className="text-xl font-bold text-[#1CB0F6] flex items-center gap-3"
+                    style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+                  >
+                    <Volume2 className="w-6 h-6" />
+                    Listen to Your Story
+                  </h3>
+                  <Button
+                    onClick={handleToggleNarration}
+                    className="bg-[#1CB0F6] hover:bg-[#1BA0E1] text-white font-bold py-2 px-4 rounded-xl text-sm border-b-2 border-[#1BA0E1]"
+                    style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+                  >
+                    {showNarrationSection ? 'Hide Audio' : 'Add Audio'}
+                  </Button>
+                </div>
+
+                {showNarrationSection && (
+                  <div className="space-y-6">
+                    {/* Character Selector */}
+                    <AnimalCharacterSelector
+                      selectedCharacterId={selectedCharacterId || undefined}
+                      onCharacterSelect={handleCharacterSelect}
+                      disabled={characterLoading || narrationState.isLoading}
+                    />
+
+                    {/* Audio Player or Generation Button */}
+                    {hasAudio ? (
+                      <StoryAudioPlayer
+                        audioUrl={narrationState.audioUrl || undefined}
+                        audioData={narrationState.audioData || undefined}
+                        isLoading={narrationState.isLoading}
+                        error={narrationState.error || undefined}
+                        onRetry={handleGenerateNarration}
+                      />
+                    ) : selectedCharacterId ? (
+                      <div className="text-center p-6 bg-white rounded-2xl border-4 border-[#FFD900] shadow-lg">
+                        <h4 
+                          className="text-lg font-bold text-[#4B4B4B] mb-4"
+                          style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+                        >
+                          Ready to hear your story?
+                        </h4>
+                        <Button
+                          onClick={handleGenerateNarration}
+                          disabled={narrationState.isLoading}
+                          className="bg-[#58CC02] hover:bg-[#46A302] text-white font-bold py-3 px-6 rounded-2xl text-lg border-b-4 border-[#46A302] hover:border-[#378700] transition-all"
+                          style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+                        >
+                          {narrationState.isLoading ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              Creating Audio...
+                            </div>
+                          ) : (
+                            <>🎵 Generate Story Audio</>
+                          )}
+                        </Button>
+                        {narrationState.error && (
+                          <p 
+                            className="text-sm text-[#FF4B4B] mt-2"
+                            style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}
+                          >
+                            {narrationState.error}
+                          </p>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                )}
               </div>
 
               <div className="mt-8 text-sm text-[#777777]" style={{ fontFamily: "Comic Sans MS, cursive, sans-serif" }}>

@@ -1,4 +1,7 @@
 export { StoryCreationOptions } from './StoryCreationOptions'
 export { StoryForm } from './StoryForm'
 export { CommunityStories } from './CommunityStories'
-export { LoadingOverlay } from './LoadingOverlay' 
+export { LoadingOverlay } from './LoadingOverlay'
+export { StoryAudioPlayer } from './StoryAudioPlayer'
+export { AnimalCharacterSelector } from './AnimalCharacterSelector'
+export { StoryNarrationDemo } from './StoryNarrationDemo' 
